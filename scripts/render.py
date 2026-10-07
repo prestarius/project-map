@@ -37,7 +37,7 @@ def render(data: dict) -> str:
             },
         },
         ensure_ascii=False,
-    ).replace("</", "<\/")
+    ).replace("</", r"<\\/")
 
     view_buttons = ["<button class='view-btn active' data-view='all'>All</button>"] + [
         f"<button class='view-btn' data-view='{esc(v.get('id'))}'>{esc(v.get('name'))}</button>"
@@ -479,7 +479,7 @@ document.getElementById('save-layout').onclick=()=>{{
     return copy;
   }});
   delete out.status;
-  const blob=new Blob([JSON.stringify(out,null,2)+'\n'],{{type:'application/json'}});
+  const blob=new Blob([JSON.stringify(out,null,2)+'\\\\n'],{{type:'application/json'}});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='project-map.layout.json';
