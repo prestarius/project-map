@@ -141,22 +141,38 @@ That is enough to run Project Map locally.
 
 ---
 
-# Try it with the example project
+# Try the curated self-demo
 
-Instead of the repository's own dogfood map:
+The repository includes a curated sample based on **Project Map itself**. It is intentionally smaller than the full dogfood map, with a layout that is easy to understand immediately.
 
 ```bash
 python -m project_map \
-  --map examples/project-map.json \
+  --map examples/project-map-self-demo.json \
   render \
-  -o .project-map/example.html
+  -o .project-map/self-demo.html
 ```
 
-Then open:
+Open it:
 
-```text
-.project-map/example.html
+### macOS
+
+```bash
+open .project-map/self-demo.html
 ```
+
+### Linux
+
+```bash
+xdg-open .project-map/self-demo.html
+```
+
+### Windows
+
+```powershell
+start .project-map/self-demo.html
+```
+
+There is also a smaller generic example in `examples/project-map.json`.
 
 ---
 
@@ -389,13 +405,15 @@ It does **not** claim that CI passed merely because it is running inside GitHub 
 │   └── spec-v1.md
 │
 ├── examples/
-│   └── project-map.json
+│   ├── project-map.json
+│   └── project-map-self-demo.json
 │
 ├── tests/
 │   ├── test_cli.py
 │   ├── test_evidence.py
 │   ├── test_github.py
 │   ├── test_render.py
+│   ├── test_render_js.py
 │   └── test_validation.py
 │
 └── .github/
@@ -632,9 +650,11 @@ Current CI:
 
 1. validates `project-map.json`;
 2. runs the Python test suite;
-3. renders the example map;
-4. renders the repository's own map;
-5. smoke-tests GitHub provenance collection.
+3. renders the generic example map;
+4. renders the curated Project Map self-demo;
+5. renders the repository's own dogfood map;
+6. syntax-checks the generated JavaScript when Node.js is available;
+7. smoke-tests GitHub provenance collection.
 
 Run the same core checks locally:
 
