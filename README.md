@@ -15,6 +15,24 @@ It is intentionally simple:
 
 ---
 
+## Screenshots
+
+### Cockpit
+
+The default landing view gives a fast read on project progress, current focus, evidence health, and what needs attention.
+
+<p align="center">
+  <img src="docs/images/project-map-cockpit.webp" alt="Project Map Cockpit view" width="100%">
+</p>
+
+### Graph
+
+Switch to Graph mode for architecture, dependencies, grouped contexts, node-level evidence, relationships, and provenance.
+
+<p align="center">
+  <img src="docs/images/project-map-graph.webp" alt="Project Map Graph view with node inspector" width="100%">
+</p>
+
 ## Why Project Map?
 
 Project boards usually tell you what someone *says* is happening.
