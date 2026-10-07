@@ -80,6 +80,10 @@ svg {{ width:100%;height:100%;display:block;cursor:grab }}
 svg.dragging {{ cursor:grabbing }}
 .group-box {{ fill:#0f141b;stroke:#263241;stroke-width:1.4;stroke-dasharray:8 6;rx:18;ry:18 }}
 .group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer }}
+.overview-group rect {{ fill:#131a23;stroke:#475569;stroke-width:2;rx:18;ry:18 }}
+.overview-group text {{ fill:#e2e8f0;pointer-events:none }}
+.overview-edge {{ stroke:#64748b;stroke-width:2.2;opacity:.7;vector-effect:non-scaling-stroke }}
+.overview-edge-label {{ fill:#94a3b8;font-size:11px;pointer-events:none }}
 .edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
 .node rect {{ fill:#121821;stroke:#334155;stroke-width:1.5;rx:14;ry:14;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28)) }}
@@ -120,6 +124,7 @@ svg.dragging {{ cursor:grabbing }}
     <div class="controls">
       {''.join(view_buttons)}
       <button id="fit">Fit</button>
+      <button id="overview">Overview</button>
       <button id="save-layout">Save layout</button>
       <select id="group-filter" class="search" style="margin-left:0;min-width:180px">{''.join(group_options)}</select>
       <input id="search" class="search" placeholder="Search nodes…" />
@@ -130,6 +135,8 @@ svg.dragging {{ cursor:grabbing }}
       <svg id="graph" aria-label="Interactive project graph">
         <g id="viewport">
           <g id="groups"></g>
+          <g id="overview-edges"></g>
+          <g id="overview-groups"></g>
           <g id="edges"></g>
           <g id="nodes"></g>
         </g>
@@ -146,9 +153,9 @@ svg.dragging {{ cursor:grabbing }}
 <script>
 const DATA={graph_data};
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport');
-const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups');
+const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups'), overviewGroupsLayer=document.getElementById('overview-groups'), overviewEdgesLayer=document.getElementById('overview-edges');
 const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter');
-let view='all', group='all', selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
+let view='all', group='all', overview=false, selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 const collapsedGroups=new Set(DATA.groups.filter(g=>g.collapsed).map(g=>g.id));
 
 const nodeMap=new Map();
@@ -214,6 +221,64 @@ function groupStatus(groupId) {{
   const order=['blocked','needs_review','in_progress','planned','done'];
   const status=order.find(s=>members.some(n=>n.status===s))||'planned';
   return DATA.status[status]||DATA.status.planned;
+}}
+
+function rootGroupId(groupId) {{
+  if(!groupId) return null;
+  let current=groupId, root=null;
+  const seen=new Set();
+  while(current && !seen.has(current)) {{
+    seen.add(current);
+    const g=DATA.groups.find(x=>x.id===current);
+    if(!g) break;
+    root=current;
+    current=g.parentGroupId;
+  }}
+  return root;
+}}
+
+function rootGroups() {{ return DATA.groups.filter(g=>!g.parentGroupId); }}
+
+function groupCenter(groupId) {{
+  const members=groupMembers(groupId);
+  if(!members.length) return {x:0,y:0};
+  const xs=members.map(n=>n.x+110), ys=members.map(n=>n.y+56);
+  return {x:xs.reduce((a,b)=>a+b,0)/xs.length,y:ys.reduce((a,b)=>a+b,0)/ys.length};
+}}
+
+function aggregatedGroupEdges() {{
+  const agg=new Map();
+  DATA.edges.forEach(e=>{{
+    const a=nodeMap.get(e.from), b=nodeMap.get(e.to);
+    if(!a||!b) return;
+    const from=rootGroupId(a.groupId), to=rootGroupId(b.groupId);
+    if(!from||!to||from===to) return;
+    const key=from+'→'+to;
+    const item=agg.get(key)||{from:from,to:to,count:0};
+    item.count+=1; agg.set(key,item);
+  }});
+  return [...agg.values()];
+}}
+
+function drawOverview() {{
+  overviewGroupsLayer.innerHTML=''; overviewEdgesLayer.innerHTML='';
+  const centers=new Map();
+  rootGroups().forEach(g=>{{
+    const c=groupCenter(g.id); centers.set(g.id,c);
+    const st=groupStatus(g.id), members=groupMembers(g.id);
+    const box=el('g',{class:'overview-group','data-overview-group':g.id});
+    box.setAttribute('transform','translate('+(c.x-110)+','+(c.y-56)+')');
+    box.innerHTML='<rect width="220" height="112"></rect><text x="16" y="30" font-size="16" font-weight="700">'+st.icon+' '+escapeHtml(g.name)+'</text><text x="16" y="56" font-size="12">'+members.length+' nodes</text><text x="16" y="82" font-size="12">'+st.label+'</text>';
+    overviewGroupsLayer.appendChild(box);
+  }});
+  aggregatedGroupEdges().forEach((e,i)=>{{
+    const a=centers.get(e.from), b=centers.get(e.to); if(!a||!b)return;
+    const line=el('line',{class:'overview-edge','data-overview-edge':i,x1:a.x,y1:a.y,x2:b.x,y2:b.y});
+    overviewEdgesLayer.appendChild(line);
+    const label=el('text',{class:'overview-edge-label',x:(a.x+b.x)/2,y:(a.y+b.y)/2-6});
+    label.textContent=e.count+' relation'+(e.count===1?'':'s');
+    overviewEdgesLayer.appendChild(label);
+  }});
 }}
 
 function drawGroups() {{
@@ -290,6 +355,11 @@ function visible(n) {{
   return viewOk&&groupOk&&!hiddenByCollapse(n);
 }}
 function applyFilters() {{
+  nodesLayer.style.display=overview?'none':'';
+  edgesLayer.style.display=overview?'none':'';
+  groupsLayer.style.display=overview?'none':'';
+  overviewGroupsLayer.style.display=overview?'':'none';
+  overviewEdgesLayer.style.display=overview?'':'none';
   const q=search.value.trim().toLowerCase();
   [...nodesLayer.children].forEach(g=>{{const n=nodeMap.get(g.dataset.id), okView=visible(n), okSearch=!q||(n.title||'').toLowerCase().includes(q)||(n.summary||'').toLowerCase().includes(q)||(n.id||'').toLowerCase().includes(q);
     g.classList.toggle('hidden',!okView);g.classList.toggle('dim',okView&&!okSearch);}});
@@ -334,6 +404,7 @@ groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters
 document.getElementById('zin').onclick=()=>{{scale=Math.min(2.5,scale*1.2);applyTransform();}};
 document.getElementById('zout').onclick=()=>{{scale=Math.max(.35,scale/1.2);applyTransform();}};
 document.getElementById('fit').onclick=()=>{{scale=1;tx=40;ty=40;applyTransform();}};
+document.getElementById('overview').onclick=()=>{{overview=!overview;document.getElementById('overview').classList.toggle('active',overview);drawOverview();applyFilters();}};
 document.getElementById('save-layout').onclick=()=>{{
   const out=JSON.parse(JSON.stringify(DATA));
   out.nodes=out.nodes.map(n=>{{
@@ -351,7 +422,7 @@ document.getElementById('save-layout').onclick=()=>{{
   URL.revokeObjectURL(a.href);
 }};
 
-draw(); tx=40;ty=40;applyTransform();
+draw(); drawOverview(); tx=40;ty=40;applyTransform(); applyFilters();
 </script>
 </body>
 </html>"""
