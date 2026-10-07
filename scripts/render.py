@@ -241,9 +241,9 @@ function rootGroups() {{ return DATA.groups.filter(g=>!g.parentGroupId); }}
 
 function groupCenter(groupId) {{
   const members=groupMembers(groupId);
-  if(!members.length) return {x:0,y:0};
+  if(!members.length) return {{x:0,y:0}};
   const xs=members.map(n=>n.x+110), ys=members.map(n=>n.y+56);
-  return {x:xs.reduce((a,b)=>a+b,0)/xs.length,y:ys.reduce((a,b)=>a+b,0)/ys.length};
+  return {{x:xs.reduce((a,b)=>a+b,0)/xs.length,y:ys.reduce((a,b)=>a+b,0)/ys.length}};
 }}
 
 function aggregatedGroupEdges() {{
@@ -266,16 +266,16 @@ function drawOverview() {{
   rootGroups().forEach(g=>{{
     const c=groupCenter(g.id); centers.set(g.id,c);
     const st=groupStatus(g.id), members=groupMembers(g.id);
-    const box=el('g',{class:'overview-group','data-overview-group':g.id});
+    const box=el('g',{{class:'overview-group','data-overview-group':g.id}});
     box.setAttribute('transform','translate('+(c.x-110)+','+(c.y-56)+')');
     box.innerHTML='<rect width="220" height="112"></rect><text x="16" y="30" font-size="16" font-weight="700">'+st.icon+' '+escapeHtml(g.name)+'</text><text x="16" y="56" font-size="12">'+members.length+' nodes</text><text x="16" y="82" font-size="12">'+st.label+'</text>';
     overviewGroupsLayer.appendChild(box);
   }});
   aggregatedGroupEdges().forEach((e,i)=>{{
     const a=centers.get(e.from), b=centers.get(e.to); if(!a||!b)return;
-    const line=el('line',{class:'overview-edge','data-overview-edge':i,x1:a.x,y1:a.y,x2:b.x,y2:b.y});
+    const line=el('line',{{class:'overview-edge','data-overview-edge':i,x1:a.x,y1:a.y,x2:b.x,y2:b.y}});
     overviewEdgesLayer.appendChild(line);
-    const label=el('text',{class:'overview-edge-label',x:(a.x+b.x)/2,y:(a.y+b.y)/2-6});
+    const label=el('text',{{class:'overview-edge-label',x:(a.x+b.x)/2,y:(a.y+b.y)/2-6}});
     label.textContent=e.count+' relation'+(e.count===1?'':'s');
     overviewEdgesLayer.appendChild(label);
   }});
