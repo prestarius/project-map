@@ -77,6 +77,18 @@ class RenderTests(unittest.TestCase):
         self.assertIn("groupStatus", output)
         self.assertIn("parentGroupId", output)
 
+    def test_renderer_supports_overview_and_aggregated_edges(self):
+        data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
+
+        output = render(data)
+
+        self.assertIn('id="overview"', output)
+        self.assertIn('id="overview-groups"', output)
+        self.assertIn('id="overview-edges"', output)
+        self.assertIn("aggregatedGroupEdges", output)
+        self.assertIn("rootGroupId", output)
+        self.assertIn("drawOverview", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}

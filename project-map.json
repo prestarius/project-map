@@ -483,8 +483,8 @@
       "id": "collapsible-nested-groups",
       "title": "Collapsible Nested Groups",
       "summary": "Hierarchical groups with collapse/expand behavior and aggregated group status.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -508,8 +508,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 7 CI",
+          "state": "pass",
+          "detail": "Iteration 7 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -528,6 +528,75 @@
           "required": true,
           "state": "pass",
           "detail": "README and spec document nested/collapsible groups",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
+          }
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 7 PR #7",
+          "url": "https://github.com/prestarius/project-map/pull/7"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 7 merge",
+          "url": "https://github.com/prestarius/project-map/commit/b448596e7310de5f1c700299c5b7e8e6ae2cf734",
+          "ref": "b448596"
+        }
+      ]
+    },
+    {
+      "id": "overview-aggregated-edges",
+      "title": "Overview & Aggregated Edges",
+      "summary": "High-level root-group overview with cross-group dependency aggregation.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 2200,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Renderer overview mode aggregates root-group relationships",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 8 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and spec document overview behavior",
           "collector": {
             "type": "path_exists",
             "path": "docs/spec-v1.md"
@@ -610,6 +679,16 @@
     {
       "from": "collapsible-nested-groups",
       "to": "groups-swimlanes",
+      "type": "depends_on"
+    },
+    {
+      "from": "overview-aggregated-edges",
+      "to": "collapsible-nested-groups",
+      "type": "depends_on"
+    },
+    {
+      "from": "overview-aggregated-edges",
+      "to": "renderer",
       "type": "depends_on"
     }
   ],

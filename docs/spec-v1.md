@@ -271,3 +271,17 @@ Nodes join a group using `groupId`:
 ```
 
 A group reference must point to an existing group. Groups may optionally reference a parent group with `parentGroupId`; parent references must exist and group hierarchies must not contain cycles. `collapsed` may provide the renderer's initial collapsed state. Groups are intentionally optional so a small Project Map can remain flat. Renderers may visualize groups as swimlanes or bounded-context boxes and may support collapse/expand interactions.
+
+
+### overview rendering
+
+Overview is a renderer projection rather than a new source-of-truth model.
+
+A renderer may:
+
+- represent top-level groups as summary nodes;
+- aggregate status from descendant nodes;
+- aggregate multiple node-level edges between two top-level groups into one overview edge;
+- annotate an overview edge with the number of underlying relationships.
+
+The canonical `nodes`, `groups`, and `edges` remain unchanged. Overview must be derivable from those structures.
