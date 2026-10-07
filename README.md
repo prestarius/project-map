@@ -25,10 +25,15 @@ Code existing in the repository is not enough to call something done.
 
 ## Interactive map
 
-The generated HTML is a real project graph, not a static report.
+The generated HTML is a polished interactive project dashboard, not a static report.
 
 Current interaction model:
 
+- premium dark dashboard UI with glass panels and subtle depth;
+- project-wide status summary chips;
+- breadcrumbs for overview and group drill-down;
+- polished status-accented node cards;
+- curved dependency arrows with connected-edge focus highlighting;
 - pan the canvas;
 - zoom with mouse wheel or controls;
 - drag nodes;
@@ -258,6 +263,7 @@ Near-term:
 - PR discovery and issue links;
 - tool-specific skills and adapters;
 - keyboard navigation, URL state and shareable deep links;
+- minimap / orientation aid;
 
 ## License
 
