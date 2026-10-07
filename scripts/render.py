@@ -254,7 +254,7 @@ function aggregatedGroupEdges() {{
     const from=rootGroupId(a.groupId), to=rootGroupId(b.groupId);
     if(!from||!to||from===to) return;
     const key=from+'→'+to;
-    const item=agg.get(key)||{from:from,to:to,count:0};
+    const item=agg.get(key)||{{from:from,to:to,count:0}};
     item.count+=1; agg.set(key,item);
   }});
   return [...agg.values()];
