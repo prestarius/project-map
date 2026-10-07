@@ -112,6 +112,21 @@ class RenderTests(unittest.TestCase):
         self.assertIn("renderBreadcrumbs", output)
         self.assertIn("edge connected", output.replace(".", " "))
 
+    def test_renderer_contains_project_cockpit(self):
+        data = json.loads(Path("examples/project-map-self-demo.json").read_text(encoding="utf-8"))
+        output = render(data)
+
+        self.assertIn('id="cockpit"', output)
+        self.assertIn('id="milestone-rail"', output)
+        self.assertIn('id="cockpit-cards"', output)
+        self.assertIn('id="next-step"', output)
+        self.assertIn('id="attention"', output)
+        self.assertIn('id="evidence-health"', output)
+        self.assertIn('id="cockpit-mode"', output)
+        self.assertIn('id="graph-mode"', output)
+        self.assertIn("renderCockpit", output)
+        self.assertIn("switchMode", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}
