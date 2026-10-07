@@ -54,7 +54,8 @@
         "x": 100,
         "y": 100,
         "pinned": true
-      }
+      },
+      "groupId": "model"
     },
     {
       "id": "json-schema",
@@ -82,7 +83,8 @@
         "x": 400,
         "y": 60,
         "pinned": true
-      }
+      },
+      "groupId": "model"
     },
     {
       "id": "renderer",
@@ -133,7 +135,8 @@
         "x": 400,
         "y": 230,
         "pinned": true
-      }
+      },
+      "groupId": "runtime"
     },
     {
       "id": "agent-integration",
@@ -161,7 +164,8 @@
         "x": 1000,
         "y": 300,
         "pinned": true
-      }
+      },
+      "groupId": "integration"
     },
     {
       "id": "ci-validation",
@@ -197,7 +201,8 @@
         "x": 700,
         "y": 300,
         "pinned": true
-      }
+      },
+      "groupId": "runtime"
     },
     {
       "id": "cli-evidence-engine",
@@ -265,7 +270,8 @@
         "x": 700,
         "y": 120,
         "pinned": true
-      }
+      },
+      "groupId": "runtime"
     },
     {
       "id": "github-provenance",
@@ -332,14 +338,15 @@
         "x": 1000,
         "y": 120,
         "pinned": true
-      }
+      },
+      "groupId": "integration"
     },
     {
       "id": "persistent-layout",
       "title": "Persistent Graph Layout",
       "summary": "Persist curated node positions and derive deterministic dependency-oriented fallback coordinates.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -362,8 +369,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 5 CI",
+          "state": "pass",
+          "detail": "Iteration 5 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -382,6 +389,76 @@
           "required": true,
           "state": "pass",
           "detail": "README and spec document layout persistence",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
+          }
+        }
+      },
+      "groupId": "runtime",
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 5 PR #5",
+          "url": "https://github.com/prestarius/project-map/pull/5"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 5 merge",
+          "url": "https://github.com/prestarius/project-map/commit/c26ba9d5c7632079d31120316b23fdad571d83c5",
+          "ref": "c26ba9d"
+        }
+      ]
+    },
+    {
+      "id": "groups-swimlanes",
+      "title": "Groups & Swimlanes",
+      "summary": "Optional bounded-context style groups rendered as swimlanes with group filtering.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 1600,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Schema, validation and renderer support groups",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 6 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and spec document groups",
           "collector": {
             "type": "path_exists",
             "path": "docs/spec-v1.md"
@@ -450,6 +527,33 @@
       "from": "persistent-layout",
       "to": "json-schema",
       "type": "depends_on"
+    },
+    {
+      "from": "groups-swimlanes",
+      "to": "persistent-layout",
+      "type": "depends_on"
+    },
+    {
+      "from": "groups-swimlanes",
+      "to": "json-schema",
+      "type": "depends_on"
+    }
+  ],
+  "groups": [
+    {
+      "id": "model",
+      "name": "Model & Contract",
+      "description": "Canonical Project Map model and validation contract."
+    },
+    {
+      "id": "runtime",
+      "name": "Runtime & Tooling",
+      "description": "CLI, rendering and evidence collection."
+    },
+    {
+      "id": "integration",
+      "name": "Integrations",
+      "description": "Provider and agent integrations."
     }
   ]
 }

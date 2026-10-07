@@ -24,11 +24,13 @@ def render(data: dict) -> str:
     views = data.get("views", [])
     nodes = data.get("nodes", [])
     edges = data.get("edges", [])
+    groups = data.get("groups", [])
 
     graph_data = json.dumps(
         {
             "nodes": nodes,
             "edges": edges,
+            "groups": groups,
             "status": {
                 key: {"icon": value[0], "label": value[1], "color": value[2]}
                 for key, value in STATUS.items()
@@ -40,6 +42,10 @@ def render(data: dict) -> str:
     view_buttons = ["<button class='view-btn active' data-view='all'>All</button>"] + [
         f"<button class='view-btn' data-view='{esc(v.get('id'))}'>{esc(v.get('name'))}</button>"
         for v in views
+    ]
+    group_options = ["<option value='all'>All groups</option>"] + [
+        f"<option value='{esc(g.get('id'))}'>{esc(g.get('name'))}</option>"
+        for g in groups
     ]
 
     return f"""<!doctype html>
@@ -72,6 +78,8 @@ button.active {{ border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) i
 }}
 svg {{ width:100%;height:100%;display:block;cursor:grab }}
 svg.dragging {{ cursor:grabbing }}
+.group-box {{ fill:#0f141b;stroke:#263241;stroke-width:1.4;stroke-dasharray:8 6;rx:18;ry:18 }}
+.group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;pointer-events:none }}
 .edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
 .node rect {{ fill:#121821;stroke:#334155;stroke-width:1.5;rx:14;ry:14;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28)) }}
@@ -113,6 +121,7 @@ svg.dragging {{ cursor:grabbing }}
       {''.join(view_buttons)}
       <button id="fit">Fit</button>
       <button id="save-layout">Save layout</button>
+      <select id="group-filter" class="search" style="margin-left:0;min-width:180px">{''.join(group_options)}</select>
       <input id="search" class="search" placeholder="Search nodes…" />
     </div>
   </div>
@@ -120,6 +129,7 @@ svg.dragging {{ cursor:grabbing }}
     <div class="canvas-wrap">
       <svg id="graph" aria-label="Interactive project graph">
         <g id="viewport">
+          <g id="groups"></g>
           <g id="edges"></g>
           <g id="nodes"></g>
         </g>
@@ -136,9 +146,9 @@ svg.dragging {{ cursor:grabbing }}
 <script>
 const DATA={graph_data};
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport');
-const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges');
-const inspector=document.getElementById('inspector'), search=document.getElementById('search');
-let view='all', selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
+const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups');
+const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter');
+let view='all', group='all', selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 
 const nodeMap=new Map();
 
@@ -180,8 +190,25 @@ function el(name,attrs={{}}) {{ const e=document.createElementNS('http://www.w3.
 function short(s,n=40) {{ s=s||''; return s.length>n?s.slice(0,n-1)+'…':s; }}
 function statusOf(n) {{ return DATA.status[n.status]||{{icon:'❔',label:n.status||'Unknown',color:'#64748b'}}; }}
 
+function drawGroups() {{
+  groupsLayer.innerHTML='';
+  DATA.groups.forEach(g=>{{
+    const members=DATA.nodes.filter(n=>n.groupId===g.id);
+    if(!members.length)return;
+    const xs=members.map(n=>n.x), ys=members.map(n=>n.y);
+    const minX=(g.layout&&Number.isFinite(g.layout.x))?g.layout.x:Math.min(...xs)-35;
+    const minY=(g.layout&&Number.isFinite(g.layout.y))?g.layout.y:Math.min(...ys)-45;
+    const width=(g.layout&&Number.isFinite(g.layout.width))?g.layout.width:(Math.max(...xs)-minX+255);
+    const height=(g.layout&&Number.isFinite(g.layout.height))?g.layout.height:(Math.max(...ys)-minY+155);
+    const box=el('rect',{{class:'group-box',x:minX,y:minY,width,height,'data-group':g.id}});
+    const title=el('text',{{class:'group-title',x:minX+14,y:minY+23,'data-group-title':g.id}});
+    title.textContent=g.name;
+    groupsLayer.appendChild(box);groupsLayer.appendChild(title);
+  }});
+}}
+
 function draw() {{
-  edgesLayer.innerHTML=''; nodesLayer.innerHTML='';
+  groupsLayer.innerHTML=''; edgesLayer.innerHTML=''; nodesLayer.innerHTML='';
   DATA.edges.forEach((e,idx)=>{{
     const a=nodeMap.get(e.from), b=nodeMap.get(e.to); if(!a||!b)return;
     const line=el('line',{{class:'edge '+(e.type==='blocks'?'blocks':''),'data-edge':idx}});
@@ -201,7 +228,7 @@ function draw() {{
     g.addEventListener('click',ev=>{{ev.stopPropagation();selectNode(n.id);}});
     nodesLayer.appendChild(g);
   }});
-  updatePositions(); applyFilters();
+  updatePositions(); drawGroups(); applyFilters();
 }}
 
 function updatePositions() {{
@@ -211,12 +238,20 @@ function updatePositions() {{
 }}
 
 function applyTransform() {{ viewport.setAttribute('transform',`translate(${{tx}} ${{ty}}) scale(${{scale}})`); }}
-function visible(n) {{ return view==='all'||(n.views||[]).includes(view); }}
+function visible(n) {{
+  const viewOk=view==='all'||(n.views||[]).includes(view);
+  const groupOk=group==='all'||n.groupId===group;
+  return viewOk&&groupOk;
+}}
 function applyFilters() {{
   const q=search.value.trim().toLowerCase();
   [...nodesLayer.children].forEach(g=>{{const n=nodeMap.get(g.dataset.id), okView=visible(n), okSearch=!q||(n.title||'').toLowerCase().includes(q)||(n.summary||'').toLowerCase().includes(q)||(n.id||'').toLowerCase().includes(q);
     g.classList.toggle('hidden',!okView);g.classList.toggle('dim',okView&&!okSearch);}});
   [...edgesLayer.children].forEach(line=>{{const a=nodeMap.get(line.dataset.from),b=nodeMap.get(line.dataset.to); const ok=visible(a)&&visible(b);line.classList.toggle('dim',!ok||q.length>0);}});
+  [...groupsLayer.children].forEach(item=>{{
+    const gid=item.dataset.group||item.dataset.groupTitle;
+    item.style.display=(group==='all'||gid===group)?'':'none';
+  }});
 }}
 
 function selectNode(id) {{
@@ -248,6 +283,7 @@ svg.addEventListener('wheel',ev=>{{ev.preventDefault();const factor=ev.deltaY<0?
 
 document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.view-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');view=b.dataset.view;applyFilters();}}));
 search.addEventListener('input',applyFilters);
+groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters();}});
 document.getElementById('zin').onclick=()=>{{scale=Math.min(2.5,scale*1.2);applyTransform();}};
 document.getElementById('zout').onclick=()=>{{scale=Math.max(.35,scale/1.2);applyTransform();}};
 document.getElementById('fit').onclick=()=>{{scale=1;tx=40;ty=40;applyTransform();}};

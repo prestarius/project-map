@@ -24,6 +24,11 @@ def validate(data: dict[str, Any]) -> list[str]:
     if len(view_ids) != len(views):
         errors.append("view ids must be present and unique")
 
+    groups = data.get("groups", [])
+    group_ids = {g.get("id") for g in groups if isinstance(g, dict)}
+    if len(group_ids) != len(groups):
+        errors.append("group ids must be present and unique")
+
     nodes = data.get("nodes")
     if not isinstance(nodes, list):
         errors.append("nodes must be an array")
@@ -50,6 +55,10 @@ def validate(data: dict[str, Any]) -> list[str]:
             unknown_views = set(node["views"]) - view_ids
             if unknown_views:
                 errors.append(f"{prefix}.views references unknown views: {sorted(unknown_views)}")
+
+        group_id = node.get("groupId")
+        if group_id is not None and group_id not in group_ids:
+            errors.append(f"{prefix}.groupId references unknown group: {group_id}")
 
         progress = node.get("progress", 0)
         if not isinstance(progress, int) or not 0 <= progress <= 100:

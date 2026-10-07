@@ -49,6 +49,7 @@ A node with implementation present but failing or missing verification should be
   "version": "1.0",
   "project": {},
   "views": [],
+  "groups": [],
   "nodes": [],
   "edges": []
 }
@@ -97,6 +98,7 @@ Optional:
 - `links`
 - `tags`
 - `layout`
+- `groupId`
 
 ### evidence
 
@@ -240,3 +242,32 @@ Nodes may define persistent renderer coordinates:
 - when layout is absent, renderers should use a deterministic fallback instead of mutating the canonical map.
 
 The reference renderer uses dependency depth for its fallback layout and can export manually adjusted coordinates through **Save layout**.
+
+
+### groups
+
+Groups are optional containers for bounded contexts, domains, subsystems, teams, workstreams, or other meaningful partitions.
+
+```json
+{
+  "groups": [
+    {
+      "id": "platform",
+      "name": "Platform",
+      "description": "Shared platform capabilities"
+    }
+  ]
+}
+```
+
+Nodes join a group using `groupId`:
+
+```json
+{
+  "id": "gateway",
+  "title": "Gateway",
+  "groupId": "platform"
+}
+```
+
+A group reference must point to an existing group. Groups are intentionally optional so a small Project Map can remain flat. Renderers may visualize groups as swimlanes or bounded-context boxes.

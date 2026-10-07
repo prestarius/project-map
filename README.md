@@ -35,6 +35,8 @@ Current interaction model:
 - persist node positions with `layout.x/y`;
 - export dragged positions with **Save layout**;
 - filter by Product / Architecture / Delivery views;
+- filter by optional project groups / bounded contexts;
+- render groups as visual swimlanes;
 - search nodes;
 - click a node to inspect evidence and relationships;
 - visualize progress and status directly on the graph.
@@ -131,6 +133,25 @@ Initial collectors:
 
 Collectors are explicit and deterministic: they gather evidence; they do not guess whether code is semantically complete.
 
+### Groups and swimlanes
+
+Large maps can define optional groups:
+
+```json
+"groups": [
+  { "id": "checkout", "name": "Checkout" },
+  { "id": "platform", "name": "Platform" }
+]
+```
+
+Nodes opt into a group with:
+
+```json
+"groupId": "checkout"
+```
+
+The reference renderer draws each group as a bounded swimlane and exposes a group filter. Groups are optional, so existing v1 maps remain valid without modification.
+
 ### Layout persistence
 
 Nodes may optionally define persistent coordinates:
@@ -219,7 +240,7 @@ Near-term:
 - richer evidence collectors;
 - PR discovery and issue links;
 - tool-specific skills and adapters;
-- graph groups/swimlanes and richer topology;
+- nested groups and collapsible topology;
 
 ## License
 
