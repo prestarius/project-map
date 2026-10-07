@@ -28,6 +28,18 @@ After implementation:
 6. derive the node status from that evidence;
 7. regenerate the HTML view.
 
+Prefer the repository CLI for deterministic operations:
+
+```bash
+python -m project_map validate
+python -m project_map collect
+python -m project_map render
+# or all update steps together:
+python -m project_map update
+```
+
+Do not execute evidence collectors implicitly. Collection is an explicit operation because `command` collectors may run tests or other repository-defined commands.
+
 ## Status guidance
 
 - `planned`: work has not started.
