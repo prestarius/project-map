@@ -69,9 +69,9 @@ def cmd_collect(args: argparse.Namespace) -> int:
             print(f"ERROR: {error}")
         return 1
 
+    before = json.dumps(data, sort_keys=True)
     updated = update_map(data, Path(args.root).resolve())
     if args.check:
-        before = json.dumps(data, sort_keys=True)
         after = json.dumps(updated, sort_keys=True)
         if before != after:
             print("Evidence is stale.")
