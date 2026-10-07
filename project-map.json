@@ -8,9 +8,18 @@
     "repository": "https://github.com/prestarius/project-map"
   },
   "views": [
-    { "id": "product", "name": "Product" },
-    { "id": "architecture", "name": "Architecture" },
-    { "id": "delivery", "name": "Delivery" }
+    {
+      "id": "product",
+      "name": "Product"
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture"
+    },
+    {
+      "id": "delivery",
+      "name": "Delivery"
+    }
   ],
   "nodes": [
     {
@@ -19,11 +28,27 @@
       "summary": "Canonical JSON model, statuses, evidence rules and agent behavior.",
       "status": "done",
       "progress": 100,
-      "views": ["product", "architecture", "delivery"],
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
       "evidence": {
-        "implementation": { "required": true, "state": "pass", "detail": "docs/spec-v1.md" },
-        "docs": { "required": true, "state": "pass", "detail": "README and specification included" },
-        "acceptance": { "required": true, "state": "pass", "detail": "v1 model defined" }
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "docs/spec-v1.md"
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and specification included"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "pass",
+          "detail": "v1 model defined"
+        }
       }
     },
     {
@@ -32,23 +57,67 @@
       "summary": "Machine-readable validation contract for Project Map v1.",
       "status": "done",
       "progress": 100,
-      "views": ["architecture", "delivery"],
+      "views": [
+        "architecture",
+        "delivery"
+      ],
       "evidence": {
-        "implementation": { "required": true, "state": "pass", "detail": "project-map.schema.json" },
-        "acceptance": { "required": true, "state": "pass", "detail": "Core v1 fields encoded" }
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project-map.schema.json"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "pass",
+          "detail": "Core v1 fields encoded"
+        }
       }
     },
     {
       "id": "renderer",
       "title": "Standalone HTML Renderer",
       "summary": "Dependency-free Python renderer with view filtering and evidence drill-down.",
-      "status": "needs_review",
-      "progress": 85,
-      "views": ["product", "architecture", "delivery"],
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
       "evidence": {
-        "implementation": { "required": true, "state": "pass", "detail": "scripts/render.py" },
-        "tests": { "required": true, "state": "unknown", "detail": "Automated tests not added yet" },
-        "ci": { "required": true, "state": "unknown", "detail": "CI not configured yet" }
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "scripts/render.py",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "pass",
+          "detail": "Renderer tests passed in CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "ci": {
+          "required": true,
+          "state": "pass",
+          "detail": "GitHub Actions CI passed on Iteration 2"
+        }
       }
     },
     {
@@ -57,27 +126,145 @@
       "summary": "Shared vendor-neutral instructions for coding agents.",
       "status": "in_progress",
       "progress": 60,
-      "views": ["product", "delivery"],
+      "views": [
+        "product",
+        "delivery"
+      ],
       "evidence": {
-        "implementation": { "required": true, "state": "pass", "detail": "AGENTS.md" },
-        "acceptance": { "required": true, "state": "unknown", "detail": "Tool-specific skills/adapters planned" }
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "AGENTS.md"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Tool-specific skills/adapters planned"
+        }
       }
     },
     {
       "id": "ci-validation",
       "title": "CI Validation",
       "summary": "Validate schema, sample map and renderer automatically.",
-      "status": "planned",
-      "progress": 0,
-      "views": ["delivery"],
-      "evidence": {}
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "delivery"
+      ],
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": ".github/workflows/ci.yml",
+          "collector": {
+            "type": "path_exists",
+            "path": ".github/workflows/ci.yml"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "pass",
+          "detail": "CI runs unit tests and render smoke tests"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "pass",
+          "detail": "PR checks are active and green"
+        }
+      }
+    },
+    {
+      "id": "cli-evidence-engine",
+      "title": "CLI & Evidence Engine",
+      "summary": "Vendor-neutral CLI with validation, rendering, deterministic evidence collection and status derivation.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project_map/cli.py and project_map/evidence.py",
+          "collector": {
+            "type": "path_exists",
+            "path": "project_map/cli.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 3 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and v1 spec document CLI collectors",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
+          }
+        }
+      }
     }
   ],
   "edges": [
-    { "from": "json-schema", "to": "spec-v1", "type": "implements" },
-    { "from": "renderer", "to": "spec-v1", "type": "depends_on" },
-    { "from": "agent-integration", "to": "spec-v1", "type": "depends_on" },
-    { "from": "ci-validation", "to": "json-schema", "type": "depends_on" },
-    { "from": "ci-validation", "to": "renderer", "type": "depends_on" }
+    {
+      "from": "json-schema",
+      "to": "spec-v1",
+      "type": "implements"
+    },
+    {
+      "from": "renderer",
+      "to": "spec-v1",
+      "type": "depends_on"
+    },
+    {
+      "from": "agent-integration",
+      "to": "spec-v1",
+      "type": "depends_on"
+    },
+    {
+      "from": "ci-validation",
+      "to": "json-schema",
+      "type": "depends_on"
+    },
+    {
+      "from": "ci-validation",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "cli-evidence-engine",
+      "to": "json-schema",
+      "type": "depends_on"
+    },
+    {
+      "from": "cli-evidence-engine",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "agent-integration",
+      "to": "cli-evidence-engine",
+      "type": "relates_to"
+    }
   ]
 }
