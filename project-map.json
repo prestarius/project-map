@@ -552,8 +552,8 @@
       "id": "overview-aggregated-edges",
       "title": "Overview & Aggregated Edges",
       "summary": "High-level root-group overview with cross-group dependency aggregation.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -577,8 +577,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 8 CI",
+          "state": "pass",
+          "detail": "Iteration 8 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -597,6 +597,75 @@
           "required": true,
           "state": "pass",
           "detail": "README and spec document overview behavior",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
+          }
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 8 PR #8",
+          "url": "https://github.com/prestarius/project-map/pull/8"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 8 merge",
+          "url": "https://github.com/prestarius/project-map/commit/a446f1674c7f9da59199d98a554032001c1b21bf",
+          "ref": "a446f16"
+        }
+      ]
+    },
+    {
+      "id": "overview-drilldown",
+      "title": "Overview Drill-down",
+      "summary": "Navigate from overview groups into detailed scope and inspect aggregated cross-group relationships.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 2500,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Overview groups and aggregated edges are interactive",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 9 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and spec document drill-down behavior",
           "collector": {
             "type": "path_exists",
             "path": "docs/spec-v1.md"
@@ -688,6 +757,16 @@
     },
     {
       "from": "overview-aggregated-edges",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "overview-drilldown",
+      "to": "overview-aggregated-edges",
+      "type": "depends_on"
+    },
+    {
+      "from": "overview-drilldown",
       "to": "renderer",
       "type": "depends_on"
     }
