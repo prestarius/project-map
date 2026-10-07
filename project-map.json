@@ -49,6 +49,11 @@
           "state": "pass",
           "detail": "v1 model defined"
         }
+      },
+      "layout": {
+        "x": 100,
+        "y": 100,
+        "pinned": true
       }
     },
     {
@@ -72,6 +77,11 @@
           "state": "pass",
           "detail": "Core v1 fields encoded"
         }
+      },
+      "layout": {
+        "x": 400,
+        "y": 60,
+        "pinned": true
       }
     },
     {
@@ -118,6 +128,11 @@
           "state": "pass",
           "detail": "GitHub Actions CI passed on Iteration 2"
         }
+      },
+      "layout": {
+        "x": 400,
+        "y": 230,
+        "pinned": true
       }
     },
     {
@@ -141,6 +156,11 @@
           "state": "unknown",
           "detail": "Tool-specific skills/adapters planned"
         }
+      },
+      "layout": {
+        "x": 1000,
+        "y": 300,
+        "pinned": true
       }
     },
     {
@@ -172,6 +192,11 @@
           "state": "pass",
           "detail": "PR checks are active and green"
         }
+      },
+      "layout": {
+        "x": 700,
+        "y": 300,
+        "pinned": true
       }
     },
     {
@@ -235,14 +260,19 @@
           "url": "https://github.com/prestarius/project-map/commit/2865386ee5e7eba4919ffc3a2edbc8c922dc2c8a",
           "ref": "2865386"
         }
-      ]
+      ],
+      "layout": {
+        "x": 700,
+        "y": 120,
+        "pinned": true
+      }
     },
     {
       "id": "github-provenance",
       "title": "GitHub Provenance",
       "summary": "Attach clickable commit, CI run and repository provenance to evidence without guessing successful state.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -250,9 +280,15 @@
       ],
       "links": [
         {
-          "kind": "source",
-          "label": "GitHub adapter",
-          "url": "https://github.com/prestarius/project-map/blob/feat/github-provenance/project_map/github.py"
+          "kind": "pull_request",
+          "label": "Iteration 4 PR #4",
+          "url": "https://github.com/prestarius/project-map/pull/4"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 4 merge",
+          "url": "https://github.com/prestarius/project-map/commit/e524ef7761eea7d4cd29973999a274581ae18a06",
+          "ref": "e524ef7"
         }
       ],
       "evidence": {
@@ -267,8 +303,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 4 CI",
+          "state": "pass",
+          "detail": "Iteration 4 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -285,10 +321,70 @@
         },
         "ci": {
           "required": true,
-          "state": "unknown",
-          "detail": "GitHub Actions provenance will be captured when explicitly collected",
+          "state": "pass",
+          "detail": "Iteration 4 GitHub Actions CI passed",
           "collector": {
             "type": "github_actions"
+          }
+        }
+      },
+      "layout": {
+        "x": 1000,
+        "y": 120,
+        "pinned": true
+      }
+    },
+    {
+      "id": "persistent-layout",
+      "title": "Persistent Graph Layout",
+      "summary": "Persist curated node positions and derive deterministic dependency-oriented fallback coordinates.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "layout": {
+        "x": 1300,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Renderer honors node layout and exports dragged positions",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 5 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and spec document layout persistence",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
           }
         }
       }
@@ -343,6 +439,16 @@
     {
       "from": "github-provenance",
       "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "persistent-layout",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "persistent-layout",
+      "to": "json-schema",
       "type": "depends_on"
     }
   ]
