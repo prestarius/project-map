@@ -759,8 +759,8 @@
       "id": "readme-rework",
       "title": "README & Onboarding",
       "summary": "Complete project entry point with local setup, CLI, concepts, agent workflow, CI and adoption guidance.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "delivery"
@@ -783,8 +783,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting documentation PR CI",
+          "state": "pass",
+          "detail": "Iteration 11 CI passed",
           "collector": {
             "type": "command",
             "command": [
@@ -803,6 +803,75 @@
           "required": true,
           "state": "pass",
           "detail": "README includes clone, validate, render, open, update, architecture, evidence and agent workflow"
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 11 PR #11",
+          "url": "https://github.com/prestarius/project-map/pull/11"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 11 merge",
+          "url": "https://github.com/prestarius/project-map/commit/bce4c5fd3353abe151885e9a750f391bace5ced7",
+          "ref": "bce4c5f"
+        }
+      ]
+    },
+    {
+      "id": "modern-project-cockpit",
+      "title": "Modern Project Cockpit",
+      "summary": "Dashboard-first landing with milestones, project cards, next action, attention and evidence health while preserving the full graph mode.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 3400,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Cockpit rendering and Graph mode switch implemented in scripts/render.py",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 12 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README documents Cockpit and Graph modes",
+          "collector": {
+            "type": "path_exists",
+            "path": "README.md"
+          }
         }
       }
     }
@@ -921,6 +990,16 @@
     {
       "from": "readme-rework",
       "to": "cli-evidence-engine",
+      "type": "depends_on"
+    },
+    {
+      "from": "modern-project-cockpit",
+      "to": "visual-polish-demo",
+      "type": "depends_on"
+    },
+    {
+      "from": "modern-project-cockpit",
+      "to": "overview-drilldown",
       "type": "depends_on"
     }
   ],

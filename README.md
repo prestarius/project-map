@@ -40,8 +40,14 @@ The existence of code alone is never sufficient to mark work as done.
 
 ## What it looks like
 
-Project Map renders a dark interactive engineering dashboard with:
+Project Map now opens into a dashboard-first **Project Cockpit**, with the full dependency graph available as a dedicated Graph mode.
 
+- milestone rail derived from top-level groups;
+- project-part cards with strong status treatment;
+- next actionable item;
+- needs-attention panel for blocked/review work;
+- evidence health summary;
+- Cockpit / Graph mode switching;
 - status summary chips;
 - Product / Architecture / Delivery views;
 - searchable project graph;
@@ -57,6 +63,8 @@ Project Map renders a dark interactive engineering dashboard with:
 - evidence inspection;
 - commit / PR / CI provenance links;
 - progress and verification status.
+
+Cockpit is a renderer projection over the same canonical `project-map.json`; it does not introduce a second source of truth.
 
 The generated output is still just:
 
