@@ -328,6 +328,12 @@
               }
             },
             "additionalProperties": false
+          },
+          "parentGroupId": {
+            "type": "string"
+          },
+          "collapsed": {
+            "type": "boolean"
           }
         },
         "additionalProperties": true

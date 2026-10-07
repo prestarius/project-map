@@ -270,4 +270,4 @@ Nodes join a group using `groupId`:
 }
 ```
 
-A group reference must point to an existing group. Groups are intentionally optional so a small Project Map can remain flat. Renderers may visualize groups as swimlanes or bounded-context boxes.
+A group reference must point to an existing group. Groups may optionally reference a parent group with `parentGroupId`; parent references must exist and group hierarchies must not contain cycles. `collapsed` may provide the renderer's initial collapsed state. Groups are intentionally optional so a small Project Map can remain flat. Renderers may visualize groups as swimlanes or bounded-context boxes and may support collapse/expand interactions.

@@ -62,6 +62,21 @@ class RenderTests(unittest.TestCase):
         self.assertIn("drawGroups", output)
         self.assertIn("Core", output)
 
+    def test_renderer_supports_collapsible_nested_groups(self):
+        data = json.loads(Path("examples/project-map.json").read_text(encoding="utf-8"))
+        data["groups"] = [
+            {"id": "parent", "name": "Parent", "collapsed": True},
+            {"id": "child", "name": "Child", "parentGroupId": "parent"},
+        ]
+        data["nodes"][0]["groupId"] = "child"
+
+        output = render(data)
+
+        self.assertIn("collapsedGroups", output)
+        self.assertIn("descendantGroupIds", output)
+        self.assertIn("groupStatus", output)
+        self.assertIn("parentGroupId", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}

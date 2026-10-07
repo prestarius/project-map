@@ -414,8 +414,8 @@
       "id": "groups-swimlanes",
       "title": "Groups & Swimlanes",
       "summary": "Optional bounded-context style groups rendered as swimlanes with group filtering.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -439,8 +439,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 6 CI",
+          "state": "pass",
+          "detail": "Iteration 6 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -459,6 +459,75 @@
           "required": true,
           "state": "pass",
           "detail": "README and spec document groups",
+          "collector": {
+            "type": "path_exists",
+            "path": "docs/spec-v1.md"
+          }
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 6 PR #6",
+          "url": "https://github.com/prestarius/project-map/pull/6"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 6 merge",
+          "url": "https://github.com/prestarius/project-map/commit/a8550b5b9f97496e37bdb5d6fd5ead37229aaa7c",
+          "ref": "a8550b5"
+        }
+      ]
+    },
+    {
+      "id": "collapsible-nested-groups",
+      "title": "Collapsible Nested Groups",
+      "summary": "Hierarchical groups with collapse/expand behavior and aggregated group status.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 1900,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Nested group schema, validation and renderer interaction",
+          "collector": {
+            "type": "path_exists",
+            "path": "scripts/render.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 7 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "docs": {
+          "required": true,
+          "state": "pass",
+          "detail": "README and spec document nested/collapsible groups",
           "collector": {
             "type": "path_exists",
             "path": "docs/spec-v1.md"
@@ -537,23 +606,41 @@
       "from": "groups-swimlanes",
       "to": "json-schema",
       "type": "depends_on"
+    },
+    {
+      "from": "collapsible-nested-groups",
+      "to": "groups-swimlanes",
+      "type": "depends_on"
     }
   ],
   "groups": [
     {
       "id": "model",
       "name": "Model & Contract",
-      "description": "Canonical Project Map model and validation contract."
+      "description": "Canonical Project Map model and validation contract.",
+      "parentGroupId": "core"
     },
     {
       "id": "runtime",
       "name": "Runtime & Tooling",
-      "description": "CLI, rendering and evidence collection."
+      "description": "CLI, rendering and evidence collection.",
+      "parentGroupId": "core"
     },
     {
       "id": "integration",
       "name": "Integrations",
-      "description": "Provider and agent integrations."
+      "description": "Provider and agent integrations.",
+      "parentGroupId": "delivery-integrations"
+    },
+    {
+      "id": "core",
+      "name": "Core",
+      "description": "Canonical model plus runtime capabilities."
+    },
+    {
+      "id": "delivery-integrations",
+      "name": "Delivery & Integrations",
+      "description": "CI, providers and agent integrations."
     }
   ]
 }
