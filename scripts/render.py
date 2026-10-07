@@ -158,12 +158,12 @@ function draw() {{
     const st=statusOf(n), g=el('g',{{class:'node','data-id':n.id}});
     g.innerHTML=`
       <rect width="220" height="112"></rect>
-      <text x="16" y="27" class="node-status">${st.icon}</text>
-      <text x="44" y="27" class="node-title">${escapeHtml(short(n.title,28))}</text>
-      <text x="16" y="52" class="node-summary">${escapeHtml(short(n.summary,34))}</text>
+      <text x="16" y="27" class="node-status">${{st.icon}}</text>
+      <text x="44" y="27" class="node-title">${{escapeHtml(short(n.title,28))}}</text>
+      <text x="16" y="52" class="node-summary">${{escapeHtml(short(n.summary,34))}}</text>
       <rect x="16" y="78" width="188" height="7" rx="4" class="node-progress-bg"></rect>
-      <rect x="16" y="78" width="${1.88*(n.progress||0)}" height="7" rx="4" class="node-progress" fill="${st.color}"></rect>
-      <text x="16" y="101" class="node-summary">${st.label} · ${n.progress||0}%</text>`;
+      <rect x="16" y="78" width="${{1.88*(n.progress||0)}}" height="7" rx="4" class="node-progress" fill="${{st.color}}"></rect>
+      <text x="16" y="101" class="node-summary">${{st.label}} · ${{n.progress||0}}%</text>`;
     g.addEventListener('pointerdown',ev=>{{ev.stopPropagation();draggingNode={{n,ox:ev.clientX,oy:ev.clientY,sx:n.x,sy:n.y}};svg.setPointerCapture(ev.pointerId);}});
     g.addEventListener('click',ev=>{{ev.stopPropagation();selectNode(n.id);}});
     nodesLayer.appendChild(g);
@@ -172,12 +172,12 @@ function draw() {{
 }}
 
 function updatePositions() {{
-  [...nodesLayer.children].forEach(g=>{{const n=nodeMap.get(g.dataset.id);g.setAttribute('transform',`translate(${n.x},${n.y})`);}});
+  [...nodesLayer.children].forEach(g=>{{const n=nodeMap.get(g.dataset.id);g.setAttribute('transform',`translate(${{n.x}},${{n.y}})`);}});
   [...edgesLayer.children].forEach(line=>{{const a=nodeMap.get(line.dataset.from),b=nodeMap.get(line.dataset.to);
     line.setAttribute('x1',a.x+110);line.setAttribute('y1',a.y+56);line.setAttribute('x2',b.x+110);line.setAttribute('y2',b.y+56);}});
 }}
 
-function applyTransform() {{ viewport.setAttribute('transform',`translate(${tx} ${ty}) scale(${scale})`); }}
+function applyTransform() {{ viewport.setAttribute('transform',`translate(${{tx}} ${{ty}}) scale(${{scale}})`); }}
 function visible(n) {{ return view==='all'||(n.views||[]).includes(view); }}
 function applyFilters() {{
   const q=search.value.trim().toLowerCase();
@@ -189,11 +189,11 @@ function applyFilters() {{
 function selectNode(id) {{
   selected=id; [...nodesLayer.children].forEach(g=>g.classList.toggle('selected',g.dataset.id===id));
   const n=nodeMap.get(id), st=statusOf(n);
-  const ev=Object.entries(n.evidence||{{}}).map(([name,x])=>`<div class="ev"><div class="name">${escapeHtml(name)}</div><div class="${escapeHtml(x.state||'unknown')}">${escapeHtml(x.state||'unknown')}</div><div>${escapeHtml(x.detail||'')}</div></div>`).join('');
-  const rel=DATA.edges.filter(e=>e.from===id||e.to===id).map(e=>`<div class="ev"><div class="name">${escapeHtml(e.type)}</div><div>→</div><div>${escapeHtml(e.from===id?e.to:e.from)}</div></div>`).join('');
-  inspector.innerHTML=`<h2>${st.icon} ${escapeHtml(n.title)}</h2><div class="meta">${escapeHtml(n.id)} · ${st.label} · ${n.progress||0}%</div><div class="summary">${escapeHtml(n.summary||'')}</div>
-  <div class="section-title">Evidence</div><div class="evidence">${ev||'<div class="ev"><div>No evidence recorded.</div></div>'}</div>
-  <div class="section-title">Relationships</div><div class="evidence">${rel||'<div class="ev"><div>No relationships.</div></div>'}</div>`;
+  const ev=Object.entries(n.evidence||{{}}).map(([name,x])=>`<div class="ev"><div class="name">${{escapeHtml(name)}}</div><div class="${{escapeHtml(x.state||'unknown')}}">${{escapeHtml(x.state||'unknown')}}</div><div>${{escapeHtml(x.detail||'')}}</div></div>`).join('');
+  const rel=DATA.edges.filter(e=>e.from===id||e.to===id).map(e=>`<div class="ev"><div class="name">${{escapeHtml(e.type)}}</div><div>→</div><div>${{escapeHtml(e.from===id?e.to:e.from)}}</div></div>`).join('');
+  inspector.innerHTML=`<h2>${{st.icon}} ${{escapeHtml(n.title)}}</h2><div class="meta">${{escapeHtml(n.id)}} · ${{st.label}} · ${{n.progress||0}}%</div><div class="summary">${{escapeHtml(n.summary||'')}}</div>
+  <div class="section-title">Evidence</div><div class="evidence">${{ev||'<div class="ev"><div>No evidence recorded.</div></div>'}}</div>
+  <div class="section-title">Relationships</div><div class="evidence">${{rel||'<div class="ev"><div>No relationships.</div></div>'}}</div>`;
 }}
 
 function escapeHtml(s) {{ return String(s??'').replace(/[&<>"']/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[c])); }}
