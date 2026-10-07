@@ -1,0 +1,83 @@
+{
+  "$schema": "./project-map.schema.json",
+  "version": "1.0",
+  "project": {
+    "id": "project-map",
+    "name": "Project Map",
+    "description": "Vendor-neutral, evidence-based visual project status map for agentic development.",
+    "repository": "https://github.com/prestarius/project-map"
+  },
+  "views": [
+    { "id": "product", "name": "Product" },
+    { "id": "architecture", "name": "Architecture" },
+    { "id": "delivery", "name": "Delivery" }
+  ],
+  "nodes": [
+    {
+      "id": "spec-v1",
+      "title": "Project Map v1 Specification",
+      "summary": "Canonical JSON model, statuses, evidence rules and agent behavior.",
+      "status": "done",
+      "progress": 100,
+      "views": ["product", "architecture", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass", "detail": "docs/spec-v1.md" },
+        "docs": { "required": true, "state": "pass", "detail": "README and specification included" },
+        "acceptance": { "required": true, "state": "pass", "detail": "v1 model defined" }
+      }
+    },
+    {
+      "id": "json-schema",
+      "title": "JSON Schema",
+      "summary": "Machine-readable validation contract for Project Map v1.",
+      "status": "done",
+      "progress": 100,
+      "views": ["architecture", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass", "detail": "project-map.schema.json" },
+        "acceptance": { "required": true, "state": "pass", "detail": "Core v1 fields encoded" }
+      }
+    },
+    {
+      "id": "renderer",
+      "title": "Standalone HTML Renderer",
+      "summary": "Dependency-free Python renderer with view filtering and evidence drill-down.",
+      "status": "needs_review",
+      "progress": 85,
+      "views": ["product", "architecture", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass", "detail": "scripts/render.py" },
+        "tests": { "required": true, "state": "unknown", "detail": "Automated tests not added yet" },
+        "ci": { "required": true, "state": "unknown", "detail": "CI not configured yet" }
+      }
+    },
+    {
+      "id": "agent-integration",
+      "title": "Agent Integration",
+      "summary": "Shared vendor-neutral instructions for coding agents.",
+      "status": "in_progress",
+      "progress": 60,
+      "views": ["product", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass", "detail": "AGENTS.md" },
+        "acceptance": { "required": true, "state": "unknown", "detail": "Tool-specific skills/adapters planned" }
+      }
+    },
+    {
+      "id": "ci-validation",
+      "title": "CI Validation",
+      "summary": "Validate schema, sample map and renderer automatically.",
+      "status": "planned",
+      "progress": 0,
+      "views": ["delivery"],
+      "evidence": {}
+    }
+  ],
+  "edges": [
+    { "from": "json-schema", "to": "spec-v1", "type": "implements" },
+    { "from": "renderer", "to": "spec-v1", "type": "depends_on" },
+    { "from": "agent-integration", "to": "spec-v1", "type": "depends_on" },
+    { "from": "ci-validation", "to": "json-schema", "type": "depends_on" },
+    { "from": "ci-validation", "to": "renderer", "type": "depends_on" }
+  ]
+}
