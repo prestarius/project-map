@@ -503,8 +503,7 @@ function draw() {{
       <rect x="16" y="78" width="188" height="7" rx="4" class="node-progress-bg"></rect>
       <rect x="16" y="78" width="${{1.88*(n.progress||0)}}" height="7" rx="4" class="node-progress" fill="${{st.color}}"></rect>
       <text x="16" y="101" class="node-summary">${{st.label}} · ${{n.progress||0}}%</text>`;
-    g.addEventListener('pointerdown',ev=>{{ev.stopPropagation();draggingNode={{n,ox:ev.clientX,oy:ev.clientY,sx:n.x,sy:n.y}};svg.setPointerCapture(ev.pointerId);}});
-    g.addEventListener('click',ev=>{{ev.stopPropagation();selectNode(n.id);}});
+    g.addEventListener('pointerdown',ev=>{{ev.stopPropagation();draggingNode={{n,ox:ev.clientX,oy:ev.clientY,sx:n.x,sy:n.y,moved:false,pointerId:ev.pointerId}};svg.setPointerCapture(ev.pointerId);}});
     nodesLayer.appendChild(g);
   }});
   updatePositions(); drawGroups(); applyFilters();
@@ -576,10 +575,10 @@ function escapeAttr(s) {{ return escapeHtml(String(s??'')); }}
 
 svg.addEventListener('pointerdown',ev=>{{if(ev.target===svg||ev.target===viewport){{panning=true;panStart={{x:ev.clientX,y:ev.clientY,tx,ty}};svg.classList.add('dragging');svg.setPointerCapture(ev.pointerId);}}}});
 svg.addEventListener('pointermove',ev=>{{
-  if(draggingNode){{const dx=(ev.clientX-draggingNode.ox)/scale,dy=(ev.clientY-draggingNode.oy)/scale;draggingNode.n.x=draggingNode.sx+dx;draggingNode.n.y=draggingNode.sy+dy;updatePositions();}}
+  if(draggingNode){{const rawDx=ev.clientX-draggingNode.ox,rawDy=ev.clientY-draggingNode.oy;if(Math.hypot(rawDx,rawDy)>4)draggingNode.moved=true;const dx=rawDx/scale,dy=rawDy/scale;draggingNode.n.x=draggingNode.sx+dx;draggingNode.n.y=draggingNode.sy+dy;updatePositions();}}
   else if(panning){{tx=panStart.tx+(ev.clientX-panStart.x);ty=panStart.ty+(ev.clientY-panStart.y);applyTransform();}}
 }});
-svg.addEventListener('pointerup',()=>{{draggingNode=null;panning=false;svg.classList.remove('dragging');}});
+svg.addEventListener('pointerup',ev=>{{if(draggingNode&&!draggingNode.moved)selectNode(draggingNode.n.id);if(draggingNode&&svg.hasPointerCapture(draggingNode.pointerId))svg.releasePointerCapture(draggingNode.pointerId);draggingNode=null;panning=false;svg.classList.remove('dragging');}});
 svg.addEventListener('wheel',ev=>{{ev.preventDefault();const factor=ev.deltaY<0?1.12:.89;scale=Math.min(2.5,Math.max(.35,scale*factor));applyTransform();}},{{passive:false}});
 
 document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.view-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');view=b.dataset.view;applyFilters();renderCockpit();}}));
