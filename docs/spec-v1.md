@@ -116,6 +116,32 @@ Allowed evidence states:
 - `unknown`
 - `not_applicable`
 
+### evidence collectors
+
+Evidence entries may optionally declare a deterministic collector. Collectors are executed only when the user explicitly runs the CLI.
+
+```json
+{
+  "tests": {
+    "required": true,
+    "state": "unknown",
+    "collector": {
+      "type": "command",
+      "command": ["python", "-m", "unittest", "discover", "-s", "tests", "-v"],
+      "timeoutSeconds": 120
+    }
+  }
+}
+```
+
+Supported v1 collectors:
+
+- `path_exists` — pass when a declared repository path exists;
+- `command` — pass when a declared command exits with code 0;
+- `git_clean` — pass when the Git working tree has no uncommitted changes.
+
+Collectors are intentionally simple and deterministic. They must not infer semantic completion from code content.
+
 ### edges
 
 Edges make dependencies explicit.

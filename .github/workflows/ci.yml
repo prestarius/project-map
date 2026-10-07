@@ -15,11 +15,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate project map
+        run: python -m project_map validate
+
       - name: Run tests
         run: python -m unittest discover -s tests -v
 
-      - name: Render example
-        run: python scripts/render.py examples/project-map.json -o .project-map/example.html
+      - name: Render example through CLI
+        run: python -m project_map --map examples/project-map.json render -o .project-map/example.html
 
-      - name: Render dogfood map
-        run: python scripts/render.py project-map.json -o .project-map/index.html
+      - name: Render dogfood map through CLI
+        run: python -m project_map render -o .project-map/index.html

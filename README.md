@@ -71,7 +71,8 @@ Clone the repository and copy the example:
 
 ```bash
 cp examples/project-map.json project-map.json
-python3 scripts/render.py project-map.json
+python -m project_map validate
+python -m project_map render
 ```
 
 Open:
@@ -80,7 +81,52 @@ Open:
 .project-map/index.html
 ```
 
-The renderer has no external Python dependencies.
+The CLI and renderer have no external Python dependencies.
+
+## CLI
+
+Project Map now has a small vendor-neutral CLI:
+
+```bash
+python -m project_map validate
+python -m project_map render
+python -m project_map collect
+python -m project_map update
+```
+
+- `validate` checks the Project Map core contract.
+- `render` generates the standalone interactive HTML.
+- `collect` runs declared deterministic evidence collectors and updates status/progress.
+- `update` collects evidence and renders in one command.
+
+You can point it at another file or repository root:
+
+```bash
+python -m project_map --map docs/project-map.json --root . update
+```
+
+### Evidence collectors
+
+Evidence can remain manual, or declare an optional collector:
+
+```json
+"tests": {
+  "required": true,
+  "state": "unknown",
+  "collector": {
+    "type": "command",
+    "command": ["python", "-m", "unittest", "discover", "-s", "tests", "-v"]
+  }
+}
+```
+
+Initial collectors:
+
+- `path_exists`
+- `command`
+- `git_clean`
+
+Collectors are explicit and deterministic: they gather evidence; they do not guess whether code is semantically complete.
 
 ## Files
 
@@ -89,6 +135,10 @@ The renderer has no external Python dependencies.
 ├── AGENTS.md
 ├── project-map.json
 ├── project-map.schema.json
+├── project_map/
+│   ├── cli.py
+│   ├── evidence.py
+│   └── validation.py
 ├── docs/
 │   └── spec-v1.md
 ├── examples/
@@ -139,8 +189,8 @@ This repository dogfoods Project Map: its own implementation status lives in [pr
 
 Near-term:
 
-- automatic evidence collectors;
-- CLI workflow;
+- GitHub/GitLab CI evidence adapters;
+- richer evidence collectors;
 - source / PR / commit links;
 - tool-specific skills and adapters;
 - improved graph layout and persistence.
