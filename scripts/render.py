@@ -94,7 +94,7 @@ svg.dragging {{ cursor:grabbing }}
 .ev {{ display:grid;grid-template-columns:90px 70px 1fr;gap:8px;padding:9px 10px;border-top:1px solid var(--line);font-size:12px }}
 .ev:first-child {{ border-top:0 }}
 .ev .name {{ font-weight:600 }}
-.pass {{ color:#4ade80 }} .fail {{ color:#f87171 }} .unknown {{ color:#facc15 }} .not_applicable {{ color:var(--muted) }}
+.pass {{ color:#4ade80 }} .fail {{ color:#f87171 }} .unknown {{ color:#facc15 }} .not_applicable {{ color:var(--muted) }}\n.link-list {{ display:flex;flex-wrap:wrap;gap:7px }} .link-list a {{ color:#bfdbfe;text-decoration:none;border:1px solid #334155;background:#0f172a;padding:6px 8px;border-radius:8px;font-size:12px }} .link-list a:hover {{ border-color:#60a5fa }}
 .legend {{ position:absolute;left:16px;bottom:16px;background:rgba(17,21,27,.92);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;gap:12px;flex-wrap:wrap;max-width:620px }}
 .legend span {{ color:var(--muted);font-size:11px }}
 .zoom-controls {{ position:absolute;right:16px;bottom:16px;display:flex;flex-direction:column;gap:6px }}
@@ -189,14 +189,21 @@ function applyFilters() {{
 function selectNode(id) {{
   selected=id; [...nodesLayer.children].forEach(g=>g.classList.toggle('selected',g.dataset.id===id));
   const n=nodeMap.get(id), st=statusOf(n);
-  const ev=Object.entries(n.evidence||{{}}).map(([name,x])=>`<div class="ev"><div class="name">${{escapeHtml(name)}}</div><div class="${{escapeHtml(x.state||'unknown')}}">${{escapeHtml(x.state||'unknown')}}</div><div>${{escapeHtml(x.detail||'')}}</div></div>`).join('');
+  const ev=Object.entries(n.evidence||{{}}).map(([name,x])=>{{
+    const prov=(x.provenance||[]).map(p=>`<a href="${{escapeAttr(p.url)}}" target="_blank" rel="noreferrer">${{escapeHtml(p.label||p.kind||'source')}}</a>`).join('');
+    const provHtml=prov?`<div class="link-list" style="margin-top:6px">${{prov}}</div>`:'';
+    return `<div class="ev"><div class="name">${{escapeHtml(name)}}</div><div class="${{escapeHtml(x.state||'unknown')}}">${{escapeHtml(x.state||'unknown')}}</div><div>${{escapeHtml(x.detail||'')}}${{provHtml}}</div></div>`;
+  }}).join('');
   const rel=DATA.edges.filter(e=>e.from===id||e.to===id).map(e=>`<div class="ev"><div class="name">${{escapeHtml(e.type)}}</div><div>→</div><div>${{escapeHtml(e.from===id?e.to:e.from)}}</div></div>`).join('');
+  const links=(n.links||[]).map(link=>`<a href="${{escapeAttr(link.url)}}" target="_blank" rel="noreferrer">${{escapeHtml(link.label||link.kind||'link')}}</a>`).join('');
   inspector.innerHTML=`<h2>${{st.icon}} ${{escapeHtml(n.title)}}</h2><div class="meta">${{escapeHtml(n.id)}} · ${{st.label}} · ${{n.progress||0}}%</div><div class="summary">${{escapeHtml(n.summary||'')}}</div>
   <div class="section-title">Evidence</div><div class="evidence">${{ev||'<div class="ev"><div>No evidence recorded.</div></div>'}}</div>
+  ${{links?`<div class="section-title">Links</div><div class="link-list">${{links}}</div>`:''}}
   <div class="section-title">Relationships</div><div class="evidence">${{rel||'<div class="ev"><div>No relationships.</div></div>'}}</div>`;
 }}
 
 function escapeHtml(s) {{ return String(s??'').replace(/[&<>"']/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}}[c])); }}
+function escapeAttr(s) {{ return escapeHtml(String(s??'')); }}
 
 svg.addEventListener('pointerdown',ev=>{{if(ev.target===svg||ev.target===viewport){{panning=true;panStart={{x:ev.clientX,y:ev.clientY,tx,ty}};svg.classList.add('dragging');svg.setPointerCapture(ev.pointerId);}}}});
 svg.addEventListener('pointermove',ev=>{{

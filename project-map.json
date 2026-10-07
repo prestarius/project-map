@@ -178,8 +178,8 @@
       "id": "cli-evidence-engine",
       "title": "CLI & Evidence Engine",
       "summary": "Vendor-neutral CLI with validation, rendering, deterministic evidence collection and status derivation.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -197,8 +197,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 3 CI",
+          "state": "pass",
+          "detail": "Iteration 3 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -220,6 +220,75 @@
           "collector": {
             "type": "path_exists",
             "path": "docs/spec-v1.md"
+          }
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 3 PR #3",
+          "url": "https://github.com/prestarius/project-map/pull/3"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 3 merge",
+          "url": "https://github.com/prestarius/project-map/commit/2865386ee5e7eba4919ffc3a2edbc8c922dc2c8a",
+          "ref": "2865386"
+        }
+      ]
+    },
+    {
+      "id": "github-provenance",
+      "title": "GitHub Provenance",
+      "summary": "Attach clickable commit, CI run and repository provenance to evidence without guessing successful state.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "links": [
+        {
+          "kind": "source",
+          "label": "GitHub adapter",
+          "url": "https://github.com/prestarius/project-map/blob/feat/github-provenance/project_map/github.py"
+        }
+      ],
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project_map/github.py",
+          "collector": {
+            "type": "path_exists",
+            "path": "project_map/github.py"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting Iteration 4 CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "ci": {
+          "required": true,
+          "state": "unknown",
+          "detail": "GitHub Actions provenance will be captured when explicitly collected",
+          "collector": {
+            "type": "github_actions"
           }
         }
       }
@@ -265,6 +334,16 @@
       "from": "agent-integration",
       "to": "cli-evidence-engine",
       "type": "relates_to"
+    },
+    {
+      "from": "github-provenance",
+      "to": "cli-evidence-engine",
+      "type": "depends_on"
+    },
+    {
+      "from": "github-provenance",
+      "to": "renderer",
+      "type": "depends_on"
     }
   ]
 }

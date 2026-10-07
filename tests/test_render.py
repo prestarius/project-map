@@ -26,6 +26,19 @@ class RenderTests(unittest.TestCase):
         self.assertIn('"nodes"', output)
         self.assertIn('"edges"', output)
 
+    def test_renderer_contains_provenance_and_node_link_support(self):
+        data = json.loads(Path("examples/project-map.json").read_text(encoding="utf-8"))
+        data["nodes"][0]["links"] = [{"label": "PR #1", "url": "https://github.com/example/repo/pull/1"}]
+        data["nodes"][0]["evidence"]["implementation"]["provenance"] = [
+            {"kind": "commit", "label": "Commit abc1234", "url": "https://github.com/example/repo/commit/abc1234"}
+        ]
+
+        output = render(data)
+
+        self.assertIn("Commit abc1234", output)
+        self.assertIn("PR #1", output)
+        self.assertIn("link-list", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}

@@ -138,7 +138,8 @@ Supported v1 collectors:
 
 - `path_exists` — pass when a declared repository path exists;
 - `command` — pass when a declared command exits with code 0;
-- `git_clean` — pass when the Git working tree has no uncommitted changes.
+- `git_clean` — pass when the Git working tree has no uncommitted changes;
+- `github_actions` — attaches commit/run provenance from standard GitHub Actions environment variables. It changes evidence state only when a conclusion is explicitly supplied via the collector or `PROJECT_MAP_GITHUB_CONCLUSION`.
 
 Collectors are intentionally simple and deterministic. They must not infer semantic completion from code content.
 
@@ -185,3 +186,34 @@ The recommended output is:
 ```
 
 Projects may git-ignore `.project-map/index.html` while keeping `project-map.json` committed, or ignore the entire directory and generate both files on demand. The repository should state its chosen policy explicitly.
+
+
+### provenance
+
+Evidence may carry clickable provenance:
+
+```json
+{
+  "ci": {
+    "required": true,
+    "state": "pass",
+    "detail": "GitHub Actions conclusion: success",
+    "provenance": [
+      {
+        "kind": "commit",
+        "label": "Commit abc1234",
+        "url": "https://github.com/org/repo/commit/abc1234",
+        "ref": "abc1234"
+      },
+      {
+        "kind": "ci_run",
+        "label": "Actions run 12345",
+        "url": "https://github.com/org/repo/actions/runs/12345",
+        "ref": "12345"
+      }
+    ]
+  }
+}
+```
+
+Nodes may also expose general `links` for source files, pull requests, ADRs, issues, dashboards, or other supporting resources. Provenance is evidence-specific; node links are navigational context.

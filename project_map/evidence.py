@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
+
+from project_map.github import provenance_from_github
 
 PASS = "pass"
 FAIL = "fail"
@@ -42,6 +45,18 @@ def collect_evidence(evidence: dict[str, Any], root: Path) -> dict[str, Any]:
             output = (completed.stdout or completed.stderr or "").strip().splitlines()
             suffix = output[-1] if output else f"exit {completed.returncode}"
             result["detail"] = f"{' '.join(command)} — {suffix}"[:500]
+        elif kind == "github_actions":
+            conclusion = collector.get("conclusion") or os.environ.get("PROJECT_MAP_GITHUB_CONCLUSION")
+            result["provenance"] = provenance_from_github()
+            if conclusion == "success":
+                result["state"] = PASS
+                result["detail"] = "GitHub Actions conclusion: success"
+            elif conclusion in {"failure", "cancelled", "timed_out"}:
+                result["state"] = FAIL
+                result["detail"] = f"GitHub Actions conclusion: {conclusion}"
+            else:
+                result["state"] = UNKNOWN
+                result["detail"] = "GitHub Actions context captured; conclusion not provided"
         elif kind == "git_clean":
             completed = subprocess.run(
                 ["git", "status", "--porcelain"],

@@ -26,3 +26,8 @@ jobs:
 
       - name: Render dogfood map through CLI
         run: python -m project_map render -o .project-map/index.html
+
+      - name: Smoke test GitHub provenance collector
+        env:
+          PROJECT_MAP_GITHUB_CONCLUSION: success
+        run: python -m project_map collect --check || test $? -eq 2

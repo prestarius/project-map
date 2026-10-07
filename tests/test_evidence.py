@@ -1,5 +1,7 @@
+import os
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from project_map.evidence import collect_evidence, derive_progress, derive_status
@@ -57,6 +59,46 @@ class EvidenceTests(unittest.TestCase):
             },
         }
         self.assertEqual("needs_review", derive_status(node))
+
+    def test_github_actions_collector_attaches_provenance_without_guessing(self):
+        env = {
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_SERVER_URL": "https://github.com",
+            "GITHUB_REPOSITORY": "prestarius/project-map",
+            "GITHUB_SHA": "abcdef1234567890",
+            "GITHUB_RUN_ID": "98765",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            result = collect_evidence(
+                {
+                    "required": True,
+                    "state": "unknown",
+                    "collector": {"type": "github_actions"},
+                },
+                Path("."),
+            )
+
+        self.assertEqual("unknown", result["state"])
+        self.assertEqual(2, len(result["provenance"]))
+
+    def test_github_actions_collector_accepts_explicit_success(self):
+        env = {
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_REPOSITORY": "prestarius/project-map",
+            "GITHUB_SHA": "abcdef1234567890",
+            "PROJECT_MAP_GITHUB_CONCLUSION": "success",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            result = collect_evidence(
+                {
+                    "required": True,
+                    "state": "unknown",
+                    "collector": {"type": "github_actions"},
+                },
+                Path("."),
+            )
+
+        self.assertEqual("pass", result["state"])
 
 
 if __name__ == "__main__":
