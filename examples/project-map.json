@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "project": {
+    "id": "example-project",
+    "name": "Example Agentic Project",
+    "description": "Example Project Map showing product, architecture and delivery views.",
+    "repository": "https://github.com/prestarius/project-map"
+  },
+  "views": [
+    { "id": "product", "name": "Product" },
+    { "id": "architecture", "name": "Architecture" },
+    { "id": "delivery", "name": "Delivery" }
+  ],
+  "nodes": [
+    {
+      "id": "daily-planning",
+      "title": "Daily Planning",
+      "summary": "Plan a focused day with a deliberately small workload.",
+      "status": "in_progress",
+      "progress": 70,
+      "views": ["product", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass", "detail": "Feature code exists" },
+        "tests": { "required": true, "state": "pass", "detail": "Unit tests green" },
+        "ci": { "required": true, "state": "unknown", "detail": "CI not checked yet" },
+        "acceptance": { "required": true, "state": "unknown", "detail": "UX acceptance pending" }
+      }
+    },
+    {
+      "id": "ui",
+      "title": "Web UI",
+      "summary": "Interactive client application.",
+      "status": "needs_review",
+      "progress": 85,
+      "views": ["architecture", "delivery"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass" },
+        "tests": { "required": true, "state": "pass" },
+        "ci": { "required": true, "state": "fail", "detail": "Latest workflow failed" }
+      }
+    },
+    {
+      "id": "application",
+      "title": "Application Layer",
+      "summary": "Use cases and orchestration.",
+      "status": "done",
+      "progress": 100,
+      "views": ["architecture"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass" },
+        "tests": { "required": true, "state": "pass" },
+        "ci": { "required": true, "state": "pass" },
+        "acceptance": { "required": true, "state": "pass" }
+      }
+    },
+    {
+      "id": "domain",
+      "title": "Domain",
+      "summary": "Core domain model and rules.",
+      "status": "done",
+      "progress": 100,
+      "views": ["architecture"],
+      "evidence": {
+        "implementation": { "required": true, "state": "pass" },
+        "tests": { "required": true, "state": "pass" },
+        "ci": { "required": true, "state": "pass" }
+      }
+    },
+    {
+      "id": "deploy",
+      "title": "Deployment",
+      "summary": "Automated delivery pipeline.",
+      "status": "planned",
+      "progress": 0,
+      "views": ["delivery"],
+      "evidence": {}
+    }
+  ],
+  "edges": [
+    { "from": "ui", "to": "application", "type": "depends_on" },
+    { "from": "application", "to": "domain", "type": "depends_on" },
+    { "from": "deploy", "to": "ui", "type": "relates_to" }
+  ]
+}
