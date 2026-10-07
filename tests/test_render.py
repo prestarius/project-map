@@ -15,7 +15,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn('id="inspector"', output)
         self.assertIn('id="search"', output)
         self.assertIn('id="zin"', output)
-        self.assertIn('data-view="architecture"', output)
+        self.assertIn('data-view='architecture'', output)
         self.assertIn("Daily Planning", output)
 
     def test_renderer_embeds_graph_data_and_relationships(self):
