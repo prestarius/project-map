@@ -37,6 +37,8 @@ Current interaction model:
 - filter by Product / Architecture / Delivery views;
 - filter by optional project groups / bounded contexts;
 - render groups as visual swimlanes;
+- switch to a high-level Overview mode with root-group representatives;
+- aggregate cross-group dependencies into counted overview edges;
 - search nodes;
 - click a node to inspect evidence and relationships;
 - visualize progress and status directly on the graph.
@@ -152,6 +154,19 @@ Nodes opt into a group with:
 
 The reference renderer draws each group as a bounded swimlane and exposes a group filter. Groups may be nested with `parentGroupId`, and clicking a group header collapses or expands its descendant nodes. Group headers also aggregate the most important member status. Groups are optional, so existing v1 maps remain valid without modification.
 
+### Overview mode
+
+For larger maps, the renderer exposes an **Overview** mode.
+
+In overview mode:
+
+- only root groups are shown as high-level representatives;
+- each representative displays aggregated status and node count;
+- relationships between nodes in different root groups are collapsed into a single edge;
+- the edge label shows how many cross-group relationships exist.
+
+This gives an architecture/domain-level view without changing the canonical node/edge model.
+
 ### Layout persistence
 
 Nodes may optionally define persistent coordinates:
@@ -240,7 +255,7 @@ Near-term:
 - richer evidence collectors;
 - PR discovery and issue links;
 - tool-specific skills and adapters;
-- cross-group edge aggregation and overview mode;
+- overview drill-down and cross-group relationship inspection;
 
 ## License
 
