@@ -29,6 +29,27 @@ def validate(data: dict[str, Any]) -> list[str]:
     if len(group_ids) != len(groups):
         errors.append("group ids must be present and unique")
 
+    parent_by_group: dict[str, str] = {}
+    for index, group in enumerate(groups):
+        parent = group.get("parentGroupId") if isinstance(group, dict) else None
+        if parent is not None:
+            if parent not in group_ids:
+                errors.append(f"groups[{index}].parentGroupId references unknown group: {parent}")
+            elif parent == group.get("id"):
+                errors.append(f"groups[{index}].parentGroupId cannot reference itself")
+            else:
+                parent_by_group[group["id"]] = parent
+
+    for group_id in parent_by_group:
+        seen: set[str] = set()
+        current = group_id
+        while current in parent_by_group:
+            if current in seen:
+                errors.append(f"group hierarchy contains a cycle involving: {group_id}")
+                break
+            seen.add(current)
+            current = parent_by_group[current]
+
     nodes = data.get("nodes")
     if not isinstance(nodes, list):
         errors.append("nodes must be an array")
