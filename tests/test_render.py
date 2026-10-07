@@ -50,6 +50,18 @@ class RenderTests(unittest.TestCase):
         self.assertIn('id="save-layout"', output)
         self.assertIn("project-map.layout.json", output)
 
+    def test_renderer_supports_groups_and_swimlanes(self):
+        data = json.loads(Path("examples/project-map.json").read_text(encoding="utf-8"))
+        data["groups"] = [{"id": "core", "name": "Core"}]
+        data["nodes"][0]["groupId"] = "core"
+
+        output = render(data)
+
+        self.assertIn('id="groups"', output)
+        self.assertIn('id="group-filter"', output)
+        self.assertIn("drawGroups", output)
+        self.assertIn("Core", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}
