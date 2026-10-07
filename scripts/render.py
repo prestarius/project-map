@@ -79,7 +79,7 @@ button.active {{ border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) i
 svg {{ width:100%;height:100%;display:block;cursor:grab }}
 svg.dragging {{ cursor:grabbing }}
 .group-box {{ fill:#0f141b;stroke:#263241;stroke-width:1.4;stroke-dasharray:8 6;rx:18;ry:18 }}
-.group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;pointer-events:none }}
+.group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer }}
 .edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
 .node rect {{ fill:#121821;stroke:#334155;stroke-width:1.5;rx:14;ry:14;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28)) }}
@@ -149,6 +149,7 @@ const svg=document.getElementById('graph'), viewport=document.getElementById('vi
 const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups');
 const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter');
 let view='all', group='all', selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
+const collapsedGroups=new Set(DATA.groups.filter(g=>g.collapsed).map(g=>g.id));
 
 const nodeMap=new Map();
 
@@ -190,10 +191,35 @@ function el(name,attrs={{}}) {{ const e=document.createElementNS('http://www.w3.
 function short(s,n=40) {{ s=s||''; return s.length>n?s.slice(0,n-1)+'…':s; }}
 function statusOf(n) {{ return DATA.status[n.status]||{{icon:'❔',label:n.status||'Unknown',color:'#64748b'}}; }}
 
+function descendantGroupIds(groupId) {{
+  const out=new Set([groupId]);
+  let changed=true;
+  while(changed) {{
+    changed=false;
+    DATA.groups.forEach(g=>{{
+      if(g.parentGroupId && out.has(g.parentGroupId) && !out.has(g.id)) {{ out.add(g.id); changed=true; }}
+    }});
+  }}
+  return out;
+}}
+
+function groupMembers(groupId) {{
+  const ids=descendantGroupIds(groupId);
+  return DATA.nodes.filter(n=>ids.has(n.groupId));
+}}
+
+function groupStatus(groupId) {{
+  const members=groupMembers(groupId);
+  if(!members.length) return DATA.status.planned;
+  const order=['blocked','needs_review','in_progress','planned','done'];
+  const status=order.find(s=>members.some(n=>n.status===s))||'planned';
+  return DATA.status[status]||DATA.status.planned;
+}}
+
 function drawGroups() {{
   groupsLayer.innerHTML='';
   DATA.groups.forEach(g=>{{
-    const members=DATA.nodes.filter(n=>n.groupId===g.id);
+    const members=groupMembers(g.id);
     if(!members.length)return;
     const xs=members.map(n=>n.x), ys=members.map(n=>n.y);
     const minX=(g.layout&&Number.isFinite(g.layout.x))?g.layout.x:Math.min(...xs)-35;
@@ -202,7 +228,13 @@ function drawGroups() {{
     const height=(g.layout&&Number.isFinite(g.layout.height))?g.layout.height:(Math.max(...ys)-minY+155);
     const box=el('rect',{{class:'group-box',x:minX,y:minY,width,height,'data-group':g.id}});
     const title=el('text',{{class:'group-title',x:minX+14,y:minY+23,'data-group-title':g.id}});
-    title.textContent=g.name;
+    const st=groupStatus(g.id);
+    title.textContent=(collapsedGroups.has(g.id)?'▸ ':'▾ ')+st.icon+' '+g.name;
+    title.addEventListener('click',ev=>{{
+      ev.stopPropagation();
+      if(collapsedGroups.has(g.id)) collapsedGroups.delete(g.id); else collapsedGroups.add(g.id);
+      drawGroups(); applyFilters();
+    }});
     groupsLayer.appendChild(box);groupsLayer.appendChild(title);
   }});
 }}
@@ -238,10 +270,24 @@ function updatePositions() {{
 }}
 
 function applyTransform() {{ viewport.setAttribute('transform',`translate(${{tx}} ${{ty}}) scale(${{scale}})`); }}
+function hiddenByCollapse(n) {{
+  if(!n.groupId) return false;
+  let current=n.groupId;
+  const seen=new Set();
+  while(current && !seen.has(current)) {{
+    if(collapsedGroups.has(current)) return true;
+    seen.add(current);
+    const g=DATA.groups.find(x=>x.id===current);
+    current=g&&g.parentGroupId;
+  }}
+  return false;
+}}
+
 function visible(n) {{
   const viewOk=view==='all'||(n.views||[]).includes(view);
-  const groupOk=group==='all'||n.groupId===group;
-  return viewOk&&groupOk;
+  const selectedGroups=group==='all'?null:descendantGroupIds(group);
+  const groupOk=!selectedGroups||selectedGroups.has(n.groupId);
+  return viewOk&&groupOk&&!hiddenByCollapse(n);
 }}
 function applyFilters() {{
   const q=search.value.trim().toLowerCase();
@@ -250,7 +296,8 @@ function applyFilters() {{
   [...edgesLayer.children].forEach(line=>{{const a=nodeMap.get(line.dataset.from),b=nodeMap.get(line.dataset.to); const ok=visible(a)&&visible(b);line.classList.toggle('dim',!ok||q.length>0);}});
   [...groupsLayer.children].forEach(item=>{{
     const gid=item.dataset.group||item.dataset.groupTitle;
-    item.style.display=(group==='all'||gid===group)?'':'none';
+    const selectedGroups=group==='all'?null:descendantGroupIds(group);
+    item.style.display=(!selectedGroups||selectedGroups.has(gid))?'':'none';
   }});
 }}
 
