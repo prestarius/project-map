@@ -23,6 +23,22 @@ The core rule is simple:
 
 Code existing in the repository is not enough to call something done.
 
+## Interactive map
+
+The generated HTML is a real project graph, not a static report.
+
+Current interaction model:
+
+- pan the canvas;
+- zoom with mouse wheel or controls;
+- drag nodes;
+- filter by Product / Architecture / Delivery views;
+- search nodes;
+- click a node to inspect evidence and relationships;
+- visualize progress and status directly on the graph.
+
+The output is still a single standalone HTML file with no runtime dependencies.
+
 ## Status model
 
 - ⚪ `planned`
@@ -77,6 +93,8 @@ The renderer has no external Python dependencies.
 │   └── spec-v1.md
 ├── examples/
 │   └── project-map.json
+├── tests/
+│   └── test_render.py
 └── scripts/
     └── render.py
 ```
@@ -116,6 +134,16 @@ Tool-specific adapters or skills can be added later without changing the canonic
 ## Current state
 
 This repository dogfoods Project Map: its own implementation status lives in [project-map.json](project-map.json).
+
+## Roadmap
+
+Near-term:
+
+- automatic evidence collectors;
+- CLI workflow;
+- source / PR / commit links;
+- tool-specific skills and adapters;
+- improved graph layout and persistence.
 
 ## License
 
