@@ -285,3 +285,16 @@ A renderer may:
 - annotate an overview edge with the number of underlying relationships.
 
 The canonical `nodes`, `groups`, and `edges` remain unchanged. Overview must be derivable from those structures.
+
+
+### overview drill-down
+
+Overview projections should remain navigable back to canonical detail.
+
+A renderer may:
+
+- let a user select a summary group and switch to the detailed graph filtered to that group and its descendants;
+- let a user select an aggregated overview edge and inspect the canonical node-level edges that contributed to it;
+- derive all drill-down information from existing `groups`, `nodes`, and `edges`.
+
+Drill-down must not create separate relationship state.
