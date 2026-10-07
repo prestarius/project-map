@@ -85,16 +85,19 @@ svg {{ width:100%;height:100%;display:block;cursor:grab }}
 svg.dragging {{ cursor:grabbing }}
 .group-box {{ fill:#0f141b;stroke:#263241;stroke-width:1.4;stroke-dasharray:8 6;rx:18;ry:18 }}
 .group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer }}
-.overview-group rect {{ fill:#131a23;stroke:#475569;stroke-width:2;rx:18;ry:18 }}
+.overview-group rect {{ fill:url(#overviewGradient);stroke:#475569;stroke-width:1.6;rx:20;ry:20;filter:drop-shadow(0 18px 40px rgba(0,0,0,.28));transition:.18s ease }}
+.overview-group:hover rect {{ stroke:#7dd3fc;filter:drop-shadow(0 20px 44px rgba(0,0,0,.34)) drop-shadow(0 0 18px rgba(56,189,248,.12)) }}
 .overview-group {{ cursor:pointer }}
 .overview-group text {{ fill:#e2e8f0;pointer-events:none }}
 .overview-edge {{ stroke:#64748b;stroke-width:2.2;opacity:.7;vector-effect:non-scaling-stroke;cursor:pointer }}
 .overview-edge-label {{ fill:#94a3b8;font-size:11px;cursor:pointer }}
-.edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
+.edge {{ fill:none;stroke:#5f7187;stroke-width:1.7;opacity:.52;vector-effect:non-scaling-stroke;transition:.18s ease }}
+.edge.connected {{ stroke:#7dd3fc;stroke-width:2.5;opacity:.96;filter:drop-shadow(0 0 6px rgba(56,189,248,.26)) }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
 .node rect.card {{ fill:url(#nodeGradient);stroke:rgba(148,163,184,.24);stroke-width:1.2;rx:16;ry:16;filter:drop-shadow(0 14px 30px rgba(0,0,0,.28));transition:.18s ease }}
 .node .accent {{ rx:3;ry:3 }}
 .node:hover rect.card,.node.selected rect.card {{ stroke:#7dd3fc;stroke-width:1.8;filter:drop-shadow(0 18px 36px rgba(0,0,0,.34)) drop-shadow(0 0 14px rgba(56,189,248,.12)) }}
+.node {{ transition:opacity .18s ease }}
 .node.dim {{ opacity:.12 }}
 .node.hidden {{ display:none }}
 .edge.dim {{ opacity:.05 }}
@@ -142,7 +145,7 @@ svg.dragging {{ cursor:grabbing }}
     <div class="canvas-wrap">
       <div id="breadcrumbs" class="breadcrumbs"><span>Project</span><span class="sep">/</span><span>All nodes</span></div>
       <svg id="graph" aria-label="Interactive project graph">
-        <defs><linearGradient id="nodeGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#151d29"/><stop offset="100%" stop-color="#0d131c"/></linearGradient></defs>
+        <defs><linearGradient id="nodeGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#151d29"/><stop offset="100%" stop-color="#0d131c"/></linearGradient><linearGradient id="overviewGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#182334"/><stop offset="100%" stop-color="#0e1622"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker><marker id="arrow-active" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#7dd3fc"/></marker></defs>
         <g id="viewport">
           <g id="groups"></g>
           <g id="overview-edges"></g>
@@ -366,7 +369,7 @@ function draw() {{
   groupsLayer.innerHTML=''; edgesLayer.innerHTML=''; nodesLayer.innerHTML='';
   DATA.edges.forEach((e,idx)=>{{
     const a=nodeMap.get(e.from), b=nodeMap.get(e.to); if(!a||!b)return;
-    const line=el('line',{{class:'edge '+(e.type==='blocks'?'blocks':''),'data-edge':idx}});
+    const line=el('path',{{class:'edge '+(e.type==='blocks'?'blocks':''),'data-edge':idx,'marker-end':'url(#arrow)'}});
     line.dataset.from=e.from; line.dataset.to=e.to; edgesLayer.appendChild(line);
   }});
   DATA.nodes.forEach(n=>{{
@@ -389,7 +392,8 @@ function draw() {{
 function updatePositions() {{
   [...nodesLayer.children].forEach(g=>{{const n=nodeMap.get(g.dataset.id);g.setAttribute('transform',`translate(${{n.x}},${{n.y}})`);}});
   [...edgesLayer.children].forEach(line=>{{const a=nodeMap.get(line.dataset.from),b=nodeMap.get(line.dataset.to);
-    line.setAttribute('x1',a.x+110);line.setAttribute('y1',a.y+56);line.setAttribute('x2',b.x+110);line.setAttribute('y2',b.y+56);}});
+    const x1=a.x+220,y1=a.y+56,x2=b.x,y2=b.y+56,dx=Math.max(70,Math.abs(x2-x1)*.45);
+    line.setAttribute('d','M '+x1+' '+y1+' C '+(x1+dx)+' '+y1+', '+(x2-dx)+' '+y2+', '+x2+' '+y2);}});
 }}
 
 function applyTransform() {{ viewport.setAttribute('transform',`translate(${{tx}} ${{ty}}) scale(${{scale}})`); }}
@@ -431,6 +435,7 @@ function applyFilters() {{
 
 function selectNode(id) {{
   selected=id; [...nodesLayer.children].forEach(g=>g.classList.toggle('selected',g.dataset.id===id));
+  [...edgesLayer.children].forEach(line=>{{const hit=line.dataset.from===id||line.dataset.to===id;line.classList.toggle('connected',hit);line.setAttribute('marker-end',hit?'url(#arrow-active)':'url(#arrow)');}});
   const n=nodeMap.get(id), st=statusOf(n);
   const ev=Object.entries(n.evidence||{{}}).map(([name,x])=>{{
     const prov=(x.provenance||[]).map(p=>`<a href="${{escapeAttr(p.url)}}" target="_blank" rel="noreferrer">${{escapeHtml(p.label||p.kind||'source')}}</a>`).join('');
