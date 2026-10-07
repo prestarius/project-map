@@ -150,7 +150,7 @@ Nodes opt into a group with:
 "groupId": "checkout"
 ```
 
-The reference renderer draws each group as a bounded swimlane and exposes a group filter. Groups are optional, so existing v1 maps remain valid without modification.
+The reference renderer draws each group as a bounded swimlane and exposes a group filter. Groups may be nested with `parentGroupId`, and clicking a group header collapses or expands its descendant nodes. Group headers also aggregate the most important member status. Groups are optional, so existing v1 maps remain valid without modification.
 
 ### Layout persistence
 
@@ -240,7 +240,7 @@ Near-term:
 - richer evidence collectors;
 - PR discovery and issue links;
 - tool-specific skills and adapters;
-- nested groups and collapsible topology;
+- cross-group edge aggregation and overview mode;
 
 ## License
 
