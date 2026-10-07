@@ -32,6 +32,8 @@ Current interaction model:
 - pan the canvas;
 - zoom with mouse wheel or controls;
 - drag nodes;
+- persist node positions with `layout.x/y`;
+- export dragged positions with **Save layout**;
 - filter by Product / Architecture / Delivery views;
 - search nodes;
 - click a node to inspect evidence and relationships;
@@ -129,6 +131,22 @@ Initial collectors:
 
 Collectors are explicit and deterministic: they gather evidence; they do not guess whether code is semantically complete.
 
+### Layout persistence
+
+Nodes may optionally define persistent coordinates:
+
+```json
+"layout": {
+  "x": 420,
+  "y": 180,
+  "pinned": true
+}
+```
+
+When layout coordinates are absent, the renderer derives a deterministic dependency-oriented fallback layout. Upstream nodes are placed to the left and downstream nodes to the right.
+
+After manually dragging nodes in the browser, **Save layout** exports a `project-map.layout.json` containing the current coordinates. Copy the resulting `layout` values back into the canonical project map to persist the arrangement in Git.
+
 ### Provenance
 
 Evidence can now carry clickable provenance to the exact commit or GitHub Actions run that produced it. Nodes can also contain general links to PRs, source files, ADRs, issues, or dashboards. The interactive inspector renders both kinds of links.
@@ -201,7 +219,7 @@ Near-term:
 - richer evidence collectors;
 - PR discovery and issue links;
 - tool-specific skills and adapters;
-- improved graph layout and persistence.
+- graph groups/swimlanes and richer topology;
 
 ## License
 
