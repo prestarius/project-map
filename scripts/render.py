@@ -81,9 +81,10 @@ svg.dragging {{ cursor:grabbing }}
 .group-box {{ fill:#0f141b;stroke:#263241;stroke-width:1.4;stroke-dasharray:8 6;rx:18;ry:18 }}
 .group-title {{ fill:#64748b;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer }}
 .overview-group rect {{ fill:#131a23;stroke:#475569;stroke-width:2;rx:18;ry:18 }}
+.overview-group {{ cursor:pointer }}
 .overview-group text {{ fill:#e2e8f0;pointer-events:none }}
-.overview-edge {{ stroke:#64748b;stroke-width:2.2;opacity:.7;vector-effect:non-scaling-stroke }}
-.overview-edge-label {{ fill:#94a3b8;font-size:11px;pointer-events:none }}
+.overview-edge {{ stroke:#64748b;stroke-width:2.2;opacity:.7;vector-effect:non-scaling-stroke;cursor:pointer }}
+.overview-edge-label {{ fill:#94a3b8;font-size:11px;cursor:pointer }}
 .edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
 .node rect {{ fill:#121821;stroke:#334155;stroke-width:1.5;rx:14;ry:14;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28)) }}
@@ -260,6 +261,33 @@ function aggregatedGroupEdges() {{
   return [...agg.values()];
 }}
 
+function underlyingRelations(fromGroup,toGroup) {{
+  return DATA.edges.filter(e=>{{
+    const a=nodeMap.get(e.from), b=nodeMap.get(e.to);
+    return a&&b&&rootGroupId(a.groupId)===fromGroup&&rootGroupId(b.groupId)===toGroup;
+  }});
+}}
+
+function drillIntoGroup(groupId) {{
+  overview=false;
+  document.getElementById('overview').classList.remove('active');
+  group=groupId;
+  groupFilter.value=groupId;
+  descendantGroupIds(groupId).forEach(id=>collapsedGroups.delete(id));
+  drawGroups(); applyFilters();
+  const g=DATA.groups.find(x=>x.id===groupId);
+  const members=groupMembers(groupId);
+  const st=groupStatus(groupId);
+  inspector.innerHTML='<h2>'+st.icon+' '+escapeHtml(g?g.name:groupId)+'</h2><div class="meta">'+members.length+' nodes · '+escapeHtml(st.label)+'</div><div class="summary">'+escapeHtml((g&&g.description)||'')+'</div><div class="section-title">Drill-down</div><div class="evidence"><div class="ev"><div class="name">Scope</div><div>group</div><div>'+escapeHtml(groupId)+'</div></div></div>';
+}}
+
+function inspectOverviewEdge(fromGroup,toGroup) {{
+  const rels=underlyingRelations(fromGroup,toGroup);
+  const from=DATA.groups.find(g=>g.id===fromGroup), to=DATA.groups.find(g=>g.id===toGroup);
+  const rows=rels.map(e=>'<div class="ev"><div class="name">'+escapeHtml(e.type)+'</div><div>→</div><div>'+escapeHtml(e.from)+' → '+escapeHtml(e.to)+'</div></div>').join('');
+  inspector.innerHTML='<h2>Cross-group relationships</h2><div class="meta">'+escapeHtml(from?from.name:fromGroup)+' → '+escapeHtml(to?to.name:toGroup)+' · '+rels.length+' total</div><div class="section-title">Underlying edges</div><div class="evidence">'+(rows||'<div class="ev"><div>No relationships.</div></div>')+'</div>';
+}}
+
 function drawOverview() {{
   overviewGroupsLayer.innerHTML=''; overviewEdgesLayer.innerHTML='';
   const centers=new Map();
@@ -269,14 +297,17 @@ function drawOverview() {{
     const box=el('g',{{class:'overview-group','data-overview-group':g.id}});
     box.setAttribute('transform','translate('+(c.x-110)+','+(c.y-56)+')');
     box.innerHTML='<rect width="220" height="112"></rect><text x="16" y="30" font-size="16" font-weight="700">'+st.icon+' '+escapeHtml(g.name)+'</text><text x="16" y="56" font-size="12">'+members.length+' nodes</text><text x="16" y="82" font-size="12">'+st.label+'</text>';
+    box.addEventListener('click',()=>drillIntoGroup(g.id));
     overviewGroupsLayer.appendChild(box);
   }});
   aggregatedGroupEdges().forEach((e,i)=>{{
     const a=centers.get(e.from), b=centers.get(e.to); if(!a||!b)return;
     const line=el('line',{{class:'overview-edge','data-overview-edge':i,x1:a.x,y1:a.y,x2:b.x,y2:b.y}});
+    line.addEventListener('click',ev=>{{ev.stopPropagation();inspectOverviewEdge(e.from,e.to);}});
     overviewEdgesLayer.appendChild(line);
     const label=el('text',{{class:'overview-edge-label',x:(a.x+b.x)/2,y:(a.y+b.y)/2-6}});
     label.textContent=e.count+' relation'+(e.count===1?'':'s');
+    label.addEventListener('click',ev=>{{ev.stopPropagation();inspectOverviewEdge(e.from,e.to);}});
     overviewEdgesLayer.appendChild(label);
   }});
 }}

@@ -89,6 +89,16 @@ class RenderTests(unittest.TestCase):
         self.assertIn("rootGroupId", output)
         self.assertIn("drawOverview", output)
 
+    def test_renderer_supports_overview_drilldown(self):
+        data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
+
+        output = render(data)
+
+        self.assertIn("drillIntoGroup", output)
+        self.assertIn("inspectOverviewEdge", output)
+        self.assertIn("underlyingRelations", output)
+        self.assertIn("box.addEventListener('click'", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}

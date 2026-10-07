@@ -39,6 +39,8 @@ Current interaction model:
 - render groups as visual swimlanes;
 - switch to a high-level Overview mode with root-group representatives;
 - aggregate cross-group dependencies into counted overview edges;
+- click an overview group to drill into its detailed scope;
+- click an overview edge to inspect the underlying node-level relationships;
 - search nodes;
 - click a node to inspect evidence and relationships;
 - visualize progress and status directly on the graph.
@@ -165,7 +167,7 @@ In overview mode:
 - relationships between nodes in different root groups are collapsed into a single edge;
 - the edge label shows how many cross-group relationships exist.
 
-This gives an architecture/domain-level view without changing the canonical node/edge model.
+This gives an architecture/domain-level view without changing the canonical node/edge model. Overview representatives are interactive: clicking a group drills into that group's detailed scope, while clicking an aggregated edge opens the inspector with the concrete node-level relationships behind it.
 
 ### Layout persistence
 
@@ -255,7 +257,7 @@ Near-term:
 - richer evidence collectors;
 - PR discovery and issue links;
 - tool-specific skills and adapters;
-- overview drill-down and cross-group relationship inspection;
+- keyboard navigation, URL state and shareable deep links;
 
 ## License
 
