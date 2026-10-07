@@ -99,6 +99,19 @@ class RenderTests(unittest.TestCase):
         self.assertIn("underlyingRelations", output)
         self.assertIn("box.addEventListener('click'", output)
 
+    def test_renderer_contains_polished_demo_ui(self):
+        data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
+        output = render(data)
+
+        self.assertIn('id="statsbar"', output)
+        self.assertIn('id="breadcrumbs"', output)
+        self.assertIn("nodeGradient", output)
+        self.assertIn("overviewGradient", output)
+        self.assertIn("marker id=\"arrow\"", output)
+        self.assertIn("renderStats", output)
+        self.assertIn("renderBreadcrumbs", output)
+        self.assertIn("edge connected", output.replace(".", " "))
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}
