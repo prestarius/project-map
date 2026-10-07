@@ -127,6 +127,15 @@ class RenderTests(unittest.TestCase):
         self.assertIn("renderCockpit", output)
         self.assertIn("switchMode", output)
 
+    def test_graph_node_click_survives_pointer_capture(self):
+        data = json.loads(Path("examples/project-map-self-demo.json").read_text(encoding="utf-8"))
+        output = render(data)
+
+        self.assertIn("moved:false", output)
+        self.assertIn("Math.hypot(rawDx,rawDy)>4", output)
+        self.assertIn("selectNode(draggingNode.n.id)", output)
+        self.assertIn("releasePointerCapture", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}
