@@ -7,7 +7,7 @@ from typing import Mapping, Any
 
 
 def github_context(env: Mapping[str, str] | None = None) -> dict[str, Any]:
-    env = env or os.environ
+    env = os.environ if env is None else env
     if env.get("GITHUB_ACTIONS") != "true":
         return {}
 
