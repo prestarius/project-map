@@ -39,6 +39,17 @@ class RenderTests(unittest.TestCase):
         self.assertIn("PR #1", output)
         self.assertIn("link-list", output)
 
+    def test_renderer_supports_persistent_layout(self):
+        data = json.loads(Path("examples/project-map.json").read_text(encoding="utf-8"))
+        data["nodes"][0]["layout"] = {"x": 321, "y": 654, "pinned": True}
+
+        output = render(data)
+
+        self.assertIn("n.layout.x", output)
+        self.assertIn("computeLevels", output)
+        self.assertIn('id="save-layout"', output)
+        self.assertIn("project-map.layout.json", output)
+
     def test_dogfood_map_uses_supported_statuses(self):
         data = json.loads(Path("project-map.json").read_text(encoding="utf-8"))
         allowed = {"planned", "in_progress", "needs_review", "blocked", "done"}

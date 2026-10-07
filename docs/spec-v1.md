@@ -96,6 +96,7 @@ Optional:
 - `evidence`
 - `links`
 - `tags`
+- `layout`
 
 ### evidence
 
@@ -217,3 +218,25 @@ Evidence may carry clickable provenance:
 ```
 
 Nodes may also expose general `links` for source files, pull requests, ADRs, issues, dashboards, or other supporting resources. Provenance is evidence-specific; node links are navigational context.
+
+
+### layout
+
+Nodes may define persistent renderer coordinates:
+
+```json
+{
+  "layout": {
+    "x": 420,
+    "y": 180,
+    "pinned": true
+  }
+}
+```
+
+- `x` and `y` are graph-space coordinates.
+- `pinned` is optional metadata indicating that the position is intentionally curated.
+- persisted layout is part of the read model and may be committed;
+- when layout is absent, renderers should use a deterministic fallback instead of mutating the canonical map.
+
+The reference renderer uses dependency depth for its fallback layout and can export manually adjusted coordinates through **Save layout**.

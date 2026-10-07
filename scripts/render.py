@@ -112,6 +112,7 @@ svg.dragging {{ cursor:grabbing }}
     <div class="controls">
       {''.join(view_buttons)}
       <button id="fit">Fit</button>
+      <button id="save-layout">Save layout</button>
       <input id="search" class="search" placeholder="Search nodes…" />
     </div>
   </div>
@@ -140,8 +141,40 @@ const inspector=document.getElementById('inspector'), search=document.getElement
 let view='all', selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 
 const nodeMap=new Map();
-const cols=Math.max(2,Math.ceil(Math.sqrt(DATA.nodes.length)));
-DATA.nodes.forEach((n,i)=>{{ n.x=120+(i%cols)*270; n.y=100+Math.floor(i/cols)*180; nodeMap.set(n.id,n); }});
+
+function computeLevels() {{
+  const incoming=new Map(DATA.nodes.map(n=>[n.id,0]));
+  DATA.edges.forEach(e=>{{ if(incoming.has(e.to)) incoming.set(e.to,(incoming.get(e.to)||0)+1); }});
+  const level=new Map();
+  const queue=[...DATA.nodes.filter(n=>(incoming.get(n.id)||0)===0).map(n=>n.id)];
+  queue.forEach(id=>level.set(id,0));
+  while(queue.length) {{
+    const id=queue.shift(), base=level.get(id)||0;
+    DATA.edges.filter(e=>e.from===id).forEach(e=>{{
+      if(!level.has(e.to) || level.get(e.to)<base+1) level.set(e.to,base+1);
+      incoming.set(e.to,(incoming.get(e.to)||1)-1);
+      if((incoming.get(e.to)||0)===0) queue.push(e.to);
+    }});
+  }}
+  DATA.nodes.forEach(n=>{{ if(!level.has(n.id)) level.set(n.id,0); }});
+  return level;
+}}
+
+const levels=computeLevels();
+const buckets=new Map();
+DATA.nodes.forEach(n=>{{
+  if(n.layout && Number.isFinite(n.layout.x) && Number.isFinite(n.layout.y)) {{
+    n.x=n.layout.x; n.y=n.layout.y;
+  }} else {{
+    const l=levels.get(n.id)||0;
+    if(!buckets.has(l)) buckets.set(l,[]);
+    const row=buckets.get(l).length;
+    buckets.get(l).push(n.id);
+    n.x=100+l*300;
+    n.y=90+row*170;
+  }}
+  nodeMap.set(n.id,n);
+}});
 
 function el(name,attrs={{}}) {{ const e=document.createElementNS('http://www.w3.org/2000/svg',name); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); return e; }}
 function short(s,n=40) {{ s=s||''; return s.length>n?s.slice(0,n-1)+'…':s; }}
@@ -218,6 +251,22 @@ search.addEventListener('input',applyFilters);
 document.getElementById('zin').onclick=()=>{{scale=Math.min(2.5,scale*1.2);applyTransform();}};
 document.getElementById('zout').onclick=()=>{{scale=Math.max(.35,scale/1.2);applyTransform();}};
 document.getElementById('fit').onclick=()=>{{scale=1;tx=40;ty=40;applyTransform();}};
+document.getElementById('save-layout').onclick=()=>{{
+  const out=JSON.parse(JSON.stringify(DATA));
+  out.nodes=out.nodes.map(n=>{{
+    const copy={{...n}};
+    copy.layout={{x:Math.round(n.x),y:Math.round(n.y),pinned:true}};
+    delete copy.x; delete copy.y;
+    return copy;
+  }});
+  delete out.status;
+  const blob=new Blob([JSON.stringify(out,null,2)+'\n'],{{type:'application/json'}});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='project-map.layout.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}};
 
 draw(); tx=40;ty=40;applyTransform();
 </script>
