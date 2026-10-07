@@ -31,6 +31,7 @@ def render(data: dict) -> str:
             "nodes": nodes,
             "edges": edges,
             "groups": groups,
+            "projectName": project.get("name", "Project Map"),
             "status": {
                 key: {"icon": value[0], "label": value[1], "color": value[2]}
                 for key, value in STATUS.items()
@@ -59,7 +60,7 @@ def render(data: dict) -> str:
 * {{ box-sizing:border-box }}
 html,body {{ width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 12% -10%,rgba(56,189,248,.12),transparent 32%),radial-gradient(circle at 88% 0%,rgba(129,140,248,.10),transparent 30%),linear-gradient(180deg,#080b11 0%,#06080c 100%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,sans-serif }}
 button,input {{ font:inherit }}
-.app {{ height:100%;display:grid;grid-template-rows:auto auto 1fr }}
+.app {{ height:100%;display:grid;grid-template-rows:auto 1fr }}
 .topbar {{ display:flex;align-items:center;gap:22px;padding:18px 22px 14px;border-bottom:1px solid var(--line);background:rgba(8,11,17,.74);backdrop-filter:blur(18px);z-index:10;box-shadow:0 10px 40px rgba(0,0,0,.12) }}
 .brand {{ min-width:260px }}
 .brand .eyebrow {{ color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em }}
@@ -69,7 +70,50 @@ button {{ border:1px solid var(--line);background:linear-gradient(180deg,rgba(30
 button:hover {{ border-color:rgba(125,211,252,.38);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.18) }}
 button.active {{ border-color:rgba(125,211,252,.7);background:linear-gradient(180deg,rgba(14,116,144,.28),rgba(30,64,175,.24));box-shadow:0 0 0 1px rgba(125,211,252,.18) inset,0 0 26px rgba(56,189,248,.10) }}
 .search {{ margin-left:auto;min-width:220px;background:rgba(15,23,42,.66);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 11px;outline:none;backdrop-filter:blur(12px) }}
-.statsbar {{ display:flex;align-items:center;gap:10px;padding:10px 22px;border-bottom:1px solid var(--line);background:rgba(8,11,17,.58);backdrop-filter:blur(14px);z-index:9 }}
+.statsbar {{ display:none }}
+.cockpit {{ overflow:auto;padding:26px 34px 36px;background:radial-gradient(circle at 50% 0%,rgba(139,92,246,.08),transparent 28%),radial-gradient(circle at 12% 10%,rgba(16,185,129,.05),transparent 24%) }}
+.cockpit.hidden,.workspace.hidden {{ display:none }}
+.cockpit-meta {{ display:flex;align-items:center;gap:16px;color:#a1a1aa;font-size:13px;margin-bottom:28px }}
+.cockpit-meta strong {{ color:#f8fafc }}
+.cockpit-dot {{ width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px }}
+.milestone-rail {{ display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;align-items:start;margin:0 12px 34px }}
+.milestone {{ position:relative;text-align:center;padding:0 8px }}
+.milestone:before {{ content:'';position:absolute;top:23px;left:-50%;right:50%;height:4px;background:#2a2d37;z-index:0 }}
+.milestone:first-child:before {{ display:none }}
+.milestone.done:before {{ background:linear-gradient(90deg,#6ee7b7,#a78bfa) }}
+.milestone-node {{ position:relative;z-index:1;margin:auto;width:48px;height:48px;border-radius:50%;border:3px solid #3f3f50;background:#11131a;display:grid;place-items:center;font-weight:800;box-shadow:0 0 0 6px rgba(255,255,255,.015) }}
+.milestone.done .milestone-node {{ border-color:#6ee7b7;color:#6ee7b7;background:#10241f }}
+.milestone.current .milestone-node {{ border-color:#a78bfa;color:#c4b5fd;box-shadow:0 0 0 8px rgba(167,139,250,.12),0 0 34px rgba(167,139,250,.20) }}
+.milestone-title {{ margin-top:12px;font-size:15px;font-weight:700 }}
+.milestone-sub {{ color:#8b8b98;font-size:12px;margin-top:3px }}
+.cockpit-kpis {{ display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:26px }}
+.kpi-pill {{ border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:rgba(18,18,24,.8);color:#c4c4cc;font-size:12px }}
+.kpi-pill strong {{ color:#f5f3ff;font-size:16px;margin-right:4px }}
+.cockpit-grid {{ display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;max-width:1500px;margin:0 auto }}
+.panel {{ border:1px solid var(--line);background:rgba(18,18,24,.82);border-radius:18px;padding:18px;box-shadow:0 18px 60px rgba(0,0,0,.18) }}
+.panel-head {{ display:flex;justify-content:space-between;align-items:center;margin-bottom:14px }}
+.panel-eyebrow {{ font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9292a0;font-weight:800 }}
+.panel-count {{ font-size:12px;color:#a1a1aa }}
+.node-card-grid {{ display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px }}
+.cockpit-card {{ min-height:150px;border:1px solid #2b2d36;border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,rgba(37,40,48,.82),rgba(26,28,34,.82));cursor:pointer;transition:.18s ease }}
+.cockpit-card:hover {{ transform:translateY(-2px);border-color:#8b7cf6 }}
+.cockpit-card.blocked {{ background:repeating-linear-gradient(-45deg,rgba(120,45,55,.22),rgba(120,45,55,.22) 8px,rgba(38,24,29,.86) 8px,rgba(38,24,29,.86) 16px);border-color:#7f3d46 }}
+.cockpit-card.needs_review {{ border-color:#4f67d9 }}
+.cockpit-card.in_progress {{ border-color:#7d6740 }}
+.card-title {{ font-size:15px;font-weight:750;margin-bottom:8px }}
+.card-summary {{ color:#aaaab4;font-size:12px }}
+.status-badge {{ display:inline-flex;align-items:center;gap:6px;width:max-content;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.07);font-size:11px;font-weight:700;margin-top:8px }}
+.progress-track {{ height:6px;background:#363740;border-radius:999px;overflow:hidden;margin-top:12px }}
+.progress-fill {{ height:100%;border-radius:999px }}
+.side-stack {{ display:grid;gap:12px;align-content:start }}
+.callout {{ border:1px solid var(--line);background:rgba(18,18,24,.84);border-radius:16px;padding:18px }}
+.callout.attention {{ border-color:#6f3840;background:linear-gradient(180deg,rgba(72,31,38,.30),rgba(28,21,24,.86)) }}
+.callout h3 {{ margin:8px 0 6px;font-size:17px }}
+.callout p {{ margin:0;color:#a7a7b2;font-size:12px;line-height:1.5 }}
+.health-row {{ display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06);font-size:12px }}
+.health-row:first-of-type {{ border-top:0 }}
+.mode-toggle {{ display:flex;gap:6px;margin-left:8px }}
+@media(max-width:1000px) {{ .cockpit-grid {{ grid-template-columns:1fr }} .cockpit {{ padding:20px }} }}
 .stat-chip {{ display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.56);color:#cbd5e1;font-size:12px }}
 .stat-dot {{ width:7px;height:7px;border-radius:50%;box-shadow:0 0 14px currentColor }}
 .breadcrumbs {{ position:absolute;left:18px;top:18px;z-index:5;display:flex;gap:6px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:11px;background:rgba(10,15,22,.68);backdrop-filter:blur(14px);box-shadow:var(--shadow);font-size:12px;color:#cbd5e1 }}
@@ -132,6 +176,7 @@ svg.dragging {{ cursor:grabbing }}
       <h1>{esc(project.get('name', 'Project Map'))}</h1>
     </div>
     <div class="controls">
+      <div class="mode-toggle"><button id="cockpit-mode" class="active">Cockpit</button><button id="graph-mode">Graph</button></div>
       {''.join(view_buttons)}
       <button id="fit">Fit</button>
       <button id="overview">Overview</button>
@@ -141,7 +186,23 @@ svg.dragging {{ cursor:grabbing }}
     </div>
   </div>
   <div id="statsbar" class="statsbar"></div>
-  <div class="workspace">
+  <main id="cockpit" class="cockpit">
+    <div id="cockpit-meta" class="cockpit-meta"></div>
+    <div id="milestone-rail" class="milestone-rail"></div>
+    <div id="cockpit-kpis" class="cockpit-kpis"></div>
+    <div class="cockpit-grid">
+      <section class="panel">
+        <div class="panel-head"><div class="panel-eyebrow">Project parts</div><div id="parts-count" class="panel-count"></div></div>
+        <div id="cockpit-cards" class="node-card-grid"></div>
+      </section>
+      <aside class="side-stack">
+        <section id="next-step" class="callout"></section>
+        <section id="attention" class="callout attention"></section>
+        <section id="evidence-health" class="callout"></section>
+      </aside>
+    </div>
+  </main>
+  <div class="workspace hidden">
     <div class="canvas-wrap">
       <div id="breadcrumbs" class="breadcrumbs"><span>Project</span><span class="sep">/</span><span>All nodes</span></div>
       <svg id="graph" aria-label="Interactive project graph">
@@ -167,12 +228,70 @@ svg.dragging {{ cursor:grabbing }}
 const DATA={graph_data};
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport');
 const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups'), overviewGroupsLayer=document.getElementById('overview-groups'), overviewEdgesLayer=document.getElementById('overview-edges');
-const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter'), statsbar=document.getElementById('statsbar'), breadcrumbs=document.getElementById('breadcrumbs');
+const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter'), statsbar=document.getElementById('statsbar'), breadcrumbs=document.getElementById('breadcrumbs'), cockpit=document.getElementById('cockpit'), workspace=document.querySelector('.workspace'), cockpitCards=document.getElementById('cockpit-cards'), milestoneRail=document.getElementById('milestone-rail'), cockpitKpis=document.getElementById('cockpit-kpis');
 groupFilter.value='all';
 let view='all', group='all', overview=false, selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 const collapsedGroups=new Set(DATA.groups.filter(g=>g.collapsed).map(g=>g.id));
 
 const nodeMap=new Map();
+
+function scopedNodes() {{
+  const q=search.value.trim().toLowerCase();
+  return DATA.nodes.filter(n=>{{
+    const viewOk=view==='all'||(n.views||[]).includes(view);
+    const groupOk=group==='all'||descendantGroupIds(group).has(n.groupId);
+    const searchOk=!q||(n.title||'').toLowerCase().includes(q)||(n.summary||'').toLowerCase().includes(q)||(n.id||'').toLowerCase().includes(q);
+    return viewOk&&groupOk&&searchOk;
+  }});
+}}
+
+function evidenceHealth(nodes) {{
+  const all=nodes.flatMap(n=>Object.values(n.evidence||{{}})).filter(e=>e.required);
+  const pass=all.filter(e=>e.state==='pass').length;
+  const fail=all.filter(e=>e.state==='fail').length;
+  const unknown=all.filter(e=>e.state==='unknown').length;
+  return {{all:all.length,pass,fail,unknown}};
+}}
+
+function renderCockpit() {{
+  const nodes=scopedNodes();
+  const done=nodes.filter(n=>n.status==='done').length;
+  const blocked=nodes.filter(n=>n.status==='blocked');
+  const review=nodes.filter(n=>n.status==='needs_review');
+  const active=nodes.filter(n=>n.status==='in_progress');
+  const health=evidenceHealth(nodes);
+  const current=blocked[0]||review[0]||active[0]||nodes.find(n=>n.status!=='done')||nodes[0];
+  document.getElementById('cockpit-meta').innerHTML='<strong>'+escapeHtml(DATA.projectName||'Project Map')+'</strong><span>Project cockpit</span><span><span class="cockpit-dot" style="background:#6ee7b7"></span>'+done+'/'+nodes.length+' done</span>'+(blocked.length?'<span style="color:#f87171">● '+blocked.length+' blocked</span>':'');
+  const roots=rootGroups();
+  milestoneRail.innerHTML=roots.map((g,i)=>{{
+    const members=groupMembers(g.id);
+    const completed=members.length&&members.every(n=>n.status==='done');
+    const isCurrent=!completed&&members.some(n=>n.status==='in_progress'||n.status==='needs_review'||n.status==='blocked');
+    const cls=completed?'done':(isCurrent?'current':'');
+    return '<div class="milestone '+cls+'"><div class="milestone-node">'+(completed?'✓':(isCurrent?'●':'○'))+'</div><div class="milestone-title">'+escapeHtml(g.name)+'</div><div class="milestone-sub">'+(completed?'Done':(isCurrent?'In progress':'Upcoming'))+'</div></div>';
+  }}).join('');
+  cockpitKpis.innerHTML='<span class="kpi-pill"><strong>'+active.length+'</strong> active</span><span class="kpi-pill"><strong>'+review.length+'</strong> review</span><span class="kpi-pill"><strong>'+blocked.length+'</strong> blocked</span><span class="kpi-pill"><strong>'+health.pass+'/'+health.all+'</strong> evidence pass</span>';
+  cockpitCards.innerHTML=nodes.map(n=>{{
+    const st=statusOf(n);
+    const ev=Object.values(n.evidence||{{}});
+    const missing=ev.filter(x=>x.required&&x.state!=='pass').length;
+    return '<article class="cockpit-card '+escapeAttr(n.status)+'" data-cockpit-node="'+escapeAttr(n.id)+'"><div><div class="card-title">'+escapeHtml(n.title)+'</div><div class="status-badge"><span style="color:'+st.color+'">●</span>'+escapeHtml(st.label)+(n.progress!=null?' · '+n.progress+'%':'')+'</div><div class="card-summary">'+escapeHtml(n.summary||'')+'</div>'+(n.progress?'<div class="progress-track"><div class="progress-fill" style="width:'+n.progress+'%;background:'+st.color+'"></div></div>':'')+'</div><div class="card-summary">'+(missing?missing+' required checks open':'Evidence complete')+'</div></article>';
+  }}).join('');
+  [...cockpitCards.querySelectorAll('[data-cockpit-node]')].forEach(card=>card.addEventListener('click',()=>{{switchMode('graph');selectNode(card.dataset.cockpitNode);}}));
+  document.getElementById('parts-count').textContent=done+' of '+nodes.length+' done';
+  document.getElementById('next-step').innerHTML='<div class="panel-eyebrow">Next step</div><h3>'+(current?escapeHtml(current.title):'All clear')+'</h3><p>'+(current?escapeHtml(current.summary||'Continue with the current focus.'):'No open work in this scope.')+'</p>';
+  document.getElementById('attention').innerHTML='<div class="panel-eyebrow">Needs attention</div><h3>'+(blocked[0]?escapeHtml(blocked[0].title):(review[0]?escapeHtml(review[0].title):'Nothing blocked'))+'</h3><p>'+(blocked[0]?escapeHtml(blocked[0].summary||'Blocked work needs intervention.'):(review[0]?'Verification or review is still incomplete.':'No blocked items in the current scope.'))+'</p>';
+  document.getElementById('evidence-health').innerHTML='<div class="panel-eyebrow">Evidence health</div><h3>'+health.pass+'/'+health.all+' required checks passing</h3><div class="health-row"><span>Passing</span><strong>'+health.pass+'</strong></div><div class="health-row"><span>Unknown</span><strong>'+health.unknown+'</strong></div><div class="health-row"><span>Failing</span><strong>'+health.fail+'</strong></div>';
+}}
+
+function switchMode(mode) {{
+  const graph=mode==='graph';
+  cockpit.classList.toggle('hidden',graph);
+  workspace.classList.toggle('hidden',!graph);
+  document.getElementById('graph-mode').classList.toggle('active',graph);
+  document.getElementById('cockpit-mode').classList.toggle('active',!graph);
+  if(graph) {{ draw(); drawOverview(); applyFilters(); }} else renderCockpit();
+}}
 
 function renderStats() {{
   const order=['done','in_progress','needs_review','blocked','planned'];
@@ -463,9 +582,11 @@ svg.addEventListener('pointermove',ev=>{{
 svg.addEventListener('pointerup',()=>{{draggingNode=null;panning=false;svg.classList.remove('dragging');}});
 svg.addEventListener('wheel',ev=>{{ev.preventDefault();const factor=ev.deltaY<0?1.12:.89;scale=Math.min(2.5,Math.max(.35,scale*factor));applyTransform();}},{{passive:false}});
 
-document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.view-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');view=b.dataset.view;applyFilters();}}));
-search.addEventListener('input',applyFilters);
-groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters();renderBreadcrumbs();}});
+document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.view-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');view=b.dataset.view;applyFilters();renderCockpit();}}));
+search.addEventListener('input',()=>{{applyFilters();renderCockpit();}});
+groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters();renderBreadcrumbs();renderCockpit();}});
+document.getElementById('cockpit-mode').onclick=()=>switchMode('cockpit');
+document.getElementById('graph-mode').onclick=()=>switchMode('graph');
 document.getElementById('zin').onclick=()=>{{scale=Math.min(2.5,scale*1.2);applyTransform();}};
 document.getElementById('zout').onclick=()=>{{scale=Math.max(.35,scale/1.2);applyTransform();}};
 document.getElementById('fit').onclick=()=>{{scale=1;tx=40;ty=40;applyTransform();}};
@@ -493,7 +614,7 @@ function initialize() {{
     drawOverview();
     renderStats();
     renderBreadcrumbs();
-    tx=40;ty=40;applyTransform();applyFilters();
+    tx=40;ty=40;applyTransform();applyFilters();renderCockpit();switchMode('cockpit');
   }} catch (error) {{
     console.error('Project Map renderer failed', error);
     inspector.innerHTML='<h2>Renderer error</h2><div class="summary">'+escapeHtml(error&&error.message?error.message:String(error))+'</div><div class="meta">Open the browser console for the stack trace.</div>';
