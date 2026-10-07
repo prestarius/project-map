@@ -125,8 +125,15 @@ Initial collectors:
 - `path_exists`
 - `command`
 - `git_clean`
+- `github_actions`
 
 Collectors are explicit and deterministic: they gather evidence; they do not guess whether code is semantically complete.
+
+### Provenance
+
+Evidence can now carry clickable provenance to the exact commit or GitHub Actions run that produced it. Nodes can also contain general links to PRs, source files, ADRs, issues, or dashboards. The interactive inspector renders both kinds of links.
+
+The GitHub Actions collector uses standard `GITHUB_*` environment variables. It captures commit/run URLs automatically, but it will not claim a successful check unless a conclusion is explicitly supplied.
 
 ## Files
 
@@ -138,6 +145,7 @@ Collectors are explicit and deterministic: they gather evidence; they do not gue
 ├── project_map/
 │   ├── cli.py
 │   ├── evidence.py
+│   ├── github.py
 │   └── validation.py
 ├── docs/
 │   └── spec-v1.md
@@ -189,9 +197,9 @@ This repository dogfoods Project Map: its own implementation status lives in [pr
 
 Near-term:
 
-- GitHub/GitLab CI evidence adapters;
+- GitLab CI provenance adapter;
 - richer evidence collectors;
-- source / PR / commit links;
+- PR discovery and issue links;
 - tool-specific skills and adapters;
 - improved graph layout and persistence.
 
