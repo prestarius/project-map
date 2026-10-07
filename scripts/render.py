@@ -55,21 +55,26 @@ def render(data: dict) -> str:
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(project.get('name', 'Project Map'))}</title>
 <style>
-:root {{ color-scheme:dark; --bg:#090b0f; --panel:#11151b; --panel2:#171c24; --line:#28313c; --text:#f1f5f9; --muted:#8b98a8; --accent:#60a5fa; }}
+:root {{ color-scheme:dark; --bg:#07090d; --panel:rgba(15,20,28,.84); --panel2:rgba(21,28,38,.9); --line:rgba(148,163,184,.16); --text:#f8fafc; --muted:#8fa0b3; --accent:#7dd3fc; --accent2:#818cf8; --shadow:0 24px 80px rgba(0,0,0,.35); }}
 * {{ box-sizing:border-box }}
-html,body {{ width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.4 Inter,ui-sans-serif,system-ui,sans-serif }}
+html,body {{ width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 12% -10%,rgba(56,189,248,.12),transparent 32%),radial-gradient(circle at 88% 0%,rgba(129,140,248,.10),transparent 30%),linear-gradient(180deg,#080b11 0%,#06080c 100%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,sans-serif }}
 button,input {{ font:inherit }}
-.app {{ height:100%;display:grid;grid-template-rows:auto 1fr }}
-.topbar {{ display:flex;align-items:center;gap:18px;padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(9,11,15,.96);z-index:10 }}
+.app {{ height:100%;display:grid;grid-template-rows:auto auto 1fr }}
+.topbar {{ display:flex;align-items:center;gap:22px;padding:18px 22px 14px;border-bottom:1px solid var(--line);background:rgba(8,11,17,.74);backdrop-filter:blur(18px);z-index:10;box-shadow:0 10px 40px rgba(0,0,0,.12) }}
 .brand {{ min-width:260px }}
 .brand .eyebrow {{ color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em }}
-.brand h1 {{ font-size:18px;margin:2px 0 0 }}
+.brand h1 {{ font-size:20px;margin:3px 0 0;letter-spacing:-.02em }}
 .controls {{ display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:1 }}
-button {{ border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 11px;border-radius:9px;cursor:pointer }}
-button:hover {{ border-color:#3a4654 }}
-button.active {{ border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset }}
-.search {{ margin-left:auto;min-width:220px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px 11px;outline:none }}
-.workspace {{ display:grid;grid-template-columns:1fr 360px;min-height:0 }}
+button {{ border:1px solid var(--line);background:linear-gradient(180deg,rgba(30,41,59,.72),rgba(15,23,42,.72));color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;transition:.18s ease;box-shadow:inset 0 1px rgba(255,255,255,.03) }}
+button:hover {{ border-color:rgba(125,211,252,.38);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.18) }}
+button.active {{ border-color:rgba(125,211,252,.7);background:linear-gradient(180deg,rgba(14,116,144,.28),rgba(30,64,175,.24));box-shadow:0 0 0 1px rgba(125,211,252,.18) inset,0 0 26px rgba(56,189,248,.10) }}
+.search {{ margin-left:auto;min-width:220px;background:rgba(15,23,42,.66);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 11px;outline:none;backdrop-filter:blur(12px) }}
+.statsbar {{ display:flex;align-items:center;gap:10px;padding:10px 22px;border-bottom:1px solid var(--line);background:rgba(8,11,17,.58);backdrop-filter:blur(14px);z-index:9 }}
+.stat-chip {{ display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(15,23,42,.56);color:#cbd5e1;font-size:12px }}
+.stat-dot {{ width:7px;height:7px;border-radius:50%;box-shadow:0 0 14px currentColor }}
+.breadcrumbs {{ position:absolute;left:18px;top:18px;z-index:5;display:flex;gap:6px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:11px;background:rgba(10,15,22,.68);backdrop-filter:blur(14px);box-shadow:var(--shadow);font-size:12px;color:#cbd5e1 }}
+.breadcrumbs .sep {{ color:#475569 }}
+.workspace {{ display:grid;grid-template-columns:1fr 380px;min-height:0 }}
 .canvas-wrap {{ position:relative;overflow:hidden;background:
   radial-gradient(circle at 20% 20%, rgba(59,130,246,.08), transparent 30%),
   linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
@@ -87,8 +92,9 @@ svg.dragging {{ cursor:grabbing }}
 .overview-edge-label {{ fill:#94a3b8;font-size:11px;cursor:pointer }}
 .edge {{ stroke:#536171;stroke-width:1.6;opacity:.55;vector-effect:non-scaling-stroke }}
 .edge.blocks {{ stroke:#ef4444;stroke-dasharray:7 5 }}
-.node rect {{ fill:#121821;stroke:#334155;stroke-width:1.5;rx:14;ry:14;filter:drop-shadow(0 10px 22px rgba(0,0,0,.28)) }}
-.node:hover rect,.node.selected rect {{ stroke:#93c5fd;stroke-width:2 }}
+.node rect.card {{ fill:url(#nodeGradient);stroke:rgba(148,163,184,.24);stroke-width:1.2;rx:16;ry:16;filter:drop-shadow(0 14px 30px rgba(0,0,0,.28));transition:.18s ease }}
+.node .accent {{ rx:3;ry:3 }}
+.node:hover rect.card,.node.selected rect.card {{ stroke:#7dd3fc;stroke-width:1.8;filter:drop-shadow(0 18px 36px rgba(0,0,0,.34)) drop-shadow(0 0 14px rgba(56,189,248,.12)) }}
 .node.dim {{ opacity:.12 }}
 .node.hidden {{ display:none }}
 .edge.dim {{ opacity:.05 }}
@@ -97,13 +103,13 @@ svg.dragging {{ cursor:grabbing }}
 .node-status {{ font-size:15px;pointer-events:none }}
 .node-progress-bg {{ fill:#25303c }}
 .node-progress {{ pointer-events:none }}
-.inspector {{ border-left:1px solid var(--line);background:var(--panel);padding:20px;overflow:auto }}
+.inspector {{ border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(15,20,28,.92),rgba(10,14,20,.94));padding:22px;overflow:auto;backdrop-filter:blur(20px);box-shadow:-20px 0 60px rgba(0,0,0,.16) }}
 .empty {{ color:var(--muted);padding-top:30vh;text-align:center }}
 .inspector h2 {{ margin:0 0 6px;font-size:20px }}
 .meta {{ color:var(--muted);font-size:12px;margin-bottom:18px }}
 .summary {{ color:#cbd5e1;margin-bottom:22px }}
 .section-title {{ font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:20px 0 8px }}
-.evidence {{ border:1px solid var(--line);border-radius:10px;overflow:hidden }}
+.evidence {{ border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(15,23,42,.42);box-shadow:inset 0 1px rgba(255,255,255,.02) }}
 .ev {{ display:grid;grid-template-columns:90px 70px 1fr;gap:8px;padding:9px 10px;border-top:1px solid var(--line);font-size:12px }}
 .ev:first-child {{ border-top:0 }}
 .ev .name {{ font-weight:600 }}
@@ -131,9 +137,12 @@ svg.dragging {{ cursor:grabbing }}
       <input id="search" class="search" placeholder="Search nodes…" />
     </div>
   </div>
+  <div id="statsbar" class="statsbar"></div>
   <div class="workspace">
     <div class="canvas-wrap">
+      <div id="breadcrumbs" class="breadcrumbs"><span>Project</span><span class="sep">/</span><span>All nodes</span></div>
       <svg id="graph" aria-label="Interactive project graph">
+        <defs><linearGradient id="nodeGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#151d29"/><stop offset="100%" stop-color="#0d131c"/></linearGradient></defs>
         <g id="viewport">
           <g id="groups"></g>
           <g id="overview-edges"></g>
@@ -155,11 +164,29 @@ svg.dragging {{ cursor:grabbing }}
 const DATA={graph_data};
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport');
 const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups'), overviewGroupsLayer=document.getElementById('overview-groups'), overviewEdgesLayer=document.getElementById('overview-edges');
-const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter');
+const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter'), statsbar=document.getElementById('statsbar'), breadcrumbs=document.getElementById('breadcrumbs');
 let view='all', group='all', overview=false, selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 const collapsedGroups=new Set(DATA.groups.filter(g=>g.collapsed).map(g=>g.id));
 
 const nodeMap=new Map();
+
+function renderStats() {{
+  const order=['done','in_progress','needs_review','blocked','planned'];
+  statsbar.innerHTML=order.map(status=>{{
+    const st=DATA.status[status], count=DATA.nodes.filter(n=>n.status===status).length;
+    return '<span class="stat-chip"><span class="stat-dot" style="color:'+st.color+';background:'+st.color+'"></span><strong>'+count+'</strong> '+escapeHtml(st.label)+'</span>';
+  }}).join('')+'<span class="stat-chip"><strong>'+DATA.nodes.length+'</strong> total</span>';
+}}
+
+function renderBreadcrumbs() {{
+  if(overview) {{ breadcrumbs.innerHTML='<span>Overview</span>'; return; }}
+  if(group!=='all') {{
+    const g=DATA.groups.find(x=>x.id===group);
+    breadcrumbs.innerHTML='<span>Overview</span><span class="sep">/</span><span>'+escapeHtml(g?g.name:group)+'</span>';
+    return;
+  }}
+  breadcrumbs.innerHTML='<span>Project</span><span class="sep">/</span><span>All nodes</span>';
+}}
 
 function computeLevels() {{
   const incoming=new Map(DATA.nodes.map(n=>[n.id,0]));
@@ -274,7 +301,7 @@ function drillIntoGroup(groupId) {{
   group=groupId;
   groupFilter.value=groupId;
   descendantGroupIds(groupId).forEach(id=>collapsedGroups.delete(id));
-  drawGroups(); applyFilters();
+  drawGroups(); applyFilters(); renderBreadcrumbs();
   const g=DATA.groups.find(x=>x.id===groupId);
   const members=groupMembers(groupId);
   const st=groupStatus(groupId);
@@ -431,11 +458,11 @@ svg.addEventListener('wheel',ev=>{{ev.preventDefault();const factor=ev.deltaY<0?
 
 document.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click',()=>{{document.querySelectorAll('.view-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');view=b.dataset.view;applyFilters();}}));
 search.addEventListener('input',applyFilters);
-groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters();}});
+groupFilter.addEventListener('change',()=>{{group=groupFilter.value;applyFilters();renderBreadcrumbs();}});
 document.getElementById('zin').onclick=()=>{{scale=Math.min(2.5,scale*1.2);applyTransform();}};
 document.getElementById('zout').onclick=()=>{{scale=Math.max(.35,scale/1.2);applyTransform();}};
 document.getElementById('fit').onclick=()=>{{scale=1;tx=40;ty=40;applyTransform();}};
-document.getElementById('overview').onclick=()=>{{overview=!overview;document.getElementById('overview').classList.toggle('active',overview);drawOverview();applyFilters();}};
+document.getElementById('overview').onclick=()=>{{overview=!overview;document.getElementById('overview').classList.toggle('active',overview);drawOverview();applyFilters();renderBreadcrumbs();}};
 document.getElementById('save-layout').onclick=()=>{{
   const out=JSON.parse(JSON.stringify(DATA));
   out.nodes=out.nodes.map(n=>{{
@@ -453,7 +480,7 @@ document.getElementById('save-layout').onclick=()=>{{
   URL.revokeObjectURL(a.href);
 }};
 
-draw(); drawOverview(); tx=40;ty=40;applyTransform(); applyFilters();
+draw(); drawOverview(); renderStats(); renderBreadcrumbs(); tx=40;ty=40;applyTransform(); applyFilters();
 </script>
 </body>
 </html>"""
