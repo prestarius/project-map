@@ -24,6 +24,9 @@ jobs:
       - name: Render example through CLI
         run: python -m project_map --map examples/project-map.json render -o .project-map/example.html
 
+      - name: Render self-demo through CLI
+        run: python -m project_map --map examples/project-map-self-demo.json render -o .project-map/self-demo.html
+
       - name: Render dogfood map through CLI
         run: python -m project_map render -o .project-map/index.html
 

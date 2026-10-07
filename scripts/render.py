@@ -37,7 +37,7 @@ def render(data: dict) -> str:
             },
         },
         ensure_ascii=False,
-    ).replace("</", "<\/")
+    ).replace("</", r"<\\/")
 
     view_buttons = ["<button class='view-btn active' data-view='all'>All</button>"] + [
         f"<button class='view-btn' data-view='{esc(v.get('id'))}'>{esc(v.get('name'))}</button>"
@@ -168,6 +168,7 @@ const DATA={graph_data};
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport');
 const nodesLayer=document.getElementById('nodes'), edgesLayer=document.getElementById('edges'), groupsLayer=document.getElementById('groups'), overviewGroupsLayer=document.getElementById('overview-groups'), overviewEdgesLayer=document.getElementById('overview-edges');
 const inspector=document.getElementById('inspector'), search=document.getElementById('search'), groupFilter=document.getElementById('group-filter'), statsbar=document.getElementById('statsbar'), breadcrumbs=document.getElementById('breadcrumbs');
+groupFilter.value='all';
 let view='all', group='all', overview=false, selected=null, scale=1, tx=0, ty=0, panning=false, panStart=null, draggingNode=null;
 const collapsedGroups=new Set(DATA.groups.filter(g=>g.collapsed).map(g=>g.id));
 
@@ -375,9 +376,10 @@ function draw() {{
   DATA.nodes.forEach(n=>{{
     const st=statusOf(n), g=el('g',{{class:'node','data-id':n.id}});
     g.innerHTML=`
-      <rect width="220" height="112"></rect>
-      <text x="16" y="27" class="node-status">${{st.icon}}</text>
-      <text x="44" y="27" class="node-title">${{escapeHtml(short(n.title,28))}}</text>
+      <rect class="card" width="220" height="112"></rect>
+      <rect class="accent" x="0" y="14" width="4" height="84" fill="${{st.color}}"></rect>
+      <circle cx="22" cy="24" r="5" fill="${{st.color}}"></circle>
+      <text x="36" y="29" class="node-title">${{escapeHtml(short(n.title,28))}}</text>
       <text x="16" y="52" class="node-summary">${{escapeHtml(short(n.summary,34))}}</text>
       <rect x="16" y="78" width="188" height="7" rx="4" class="node-progress-bg"></rect>
       <rect x="16" y="78" width="${{1.88*(n.progress||0)}}" height="7" rx="4" class="node-progress" fill="${{st.color}}"></rect>
@@ -477,7 +479,7 @@ document.getElementById('save-layout').onclick=()=>{{
     return copy;
   }});
   delete out.status;
-  const blob=new Blob([JSON.stringify(out,null,2)+'\n'],{{type:'application/json'}});
+  const blob=new Blob([JSON.stringify(out,null,2)+'\\\\n'],{{type:'application/json'}});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='project-map.layout.json';
@@ -485,7 +487,20 @@ document.getElementById('save-layout').onclick=()=>{{
   URL.revokeObjectURL(a.href);
 }};
 
-draw(); drawOverview(); renderStats(); renderBreadcrumbs(); tx=40;ty=40;applyTransform(); applyFilters();
+function initialize() {{
+  try {{
+    draw();
+    drawOverview();
+    renderStats();
+    renderBreadcrumbs();
+    tx=40;ty=40;applyTransform();applyFilters();
+  }} catch (error) {{
+    console.error('Project Map renderer failed', error);
+    inspector.innerHTML='<h2>Renderer error</h2><div class="summary">'+escapeHtml(error&&error.message?error.message:String(error))+'</div><div class="meta">Open the browser console for the stack trace.</div>';
+    statsbar.innerHTML='<span class="stat-chip"><strong>Renderer failed</strong></span>';
+  }}
+}}
+initialize();
 </script>
 </body>
 </html>"""

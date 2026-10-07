@@ -1,0 +1,288 @@
+{
+  "$schema": "../project-map.schema.json",
+  "version": "1.0",
+  "project": {
+    "id": "project-map-self-demo",
+    "name": "Project Map — Self Demo",
+    "description": "Curated demo of Project Map using Project Map itself as the example system.",
+    "repository": "https://github.com/prestarius/project-map"
+  },
+  "views": [
+    {
+      "id": "product",
+      "name": "Product"
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture"
+    },
+    {
+      "id": "delivery",
+      "name": "Delivery"
+    }
+  ],
+  "groups": [
+    {
+      "id": "core",
+      "name": "Core",
+      "description": "Canonical model and runtime."
+    },
+    {
+      "id": "model",
+      "name": "Model & Contract",
+      "parentGroupId": "core",
+      "description": "Specification and schema."
+    },
+    {
+      "id": "runtime",
+      "name": "Runtime & Tooling",
+      "parentGroupId": "core",
+      "description": "Renderer, CLI and evidence engine."
+    },
+    {
+      "id": "integrations",
+      "name": "Integrations",
+      "description": "Provider and agent integrations."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "spec",
+      "title": "Project Map v1 Spec",
+      "summary": "Canonical model, statuses and evidence rules.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "model",
+      "layout": {
+        "x": 120,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "docs/spec-v1.md"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "pass",
+          "detail": "v1 contract defined"
+        }
+      }
+    },
+    {
+      "id": "schema",
+      "title": "JSON Schema",
+      "summary": "Machine-readable validation contract.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "model",
+      "layout": {
+        "x": 120,
+        "y": 320,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project-map.schema.json"
+        }
+      }
+    },
+    {
+      "id": "renderer",
+      "title": "Interactive Renderer",
+      "summary": "Standalone polished HTML project graph.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 480,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "scripts/render.py"
+        },
+        "tests": {
+          "required": true,
+          "state": "pass",
+          "detail": "Renderer tests green"
+        },
+        "ci": {
+          "required": true,
+          "state": "pass",
+          "detail": "GitHub Actions"
+        }
+      }
+    },
+    {
+      "id": "cli",
+      "title": "CLI & Evidence Engine",
+      "summary": "Validate, collect evidence, derive status and render.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "product",
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 480,
+        "y": 320,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project_map/cli.py"
+        },
+        "tests": {
+          "required": true,
+          "state": "pass",
+          "detail": "Unit tests green"
+        }
+      }
+    },
+    {
+      "id": "groups",
+      "title": "Groups & Overview",
+      "summary": "Nested bounded contexts, collapse and overview drill-down.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "product",
+        "architecture"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 820,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "Renderer topology features"
+        }
+      }
+    },
+    {
+      "id": "provenance",
+      "title": "GitHub Provenance",
+      "summary": "Clickable commit and CI evidence without guessing state.",
+      "status": "done",
+      "progress": 100,
+      "views": [
+        "architecture",
+        "delivery"
+      ],
+      "groupId": "integrations",
+      "layout": {
+        "x": 820,
+        "y": 320,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "project_map/github.py"
+        },
+        "ci": {
+          "required": true,
+          "state": "pass",
+          "detail": "GitHub Actions adapter"
+        }
+      }
+    },
+    {
+      "id": "agents",
+      "title": "Agent Integration",
+      "summary": "Shared vendor-neutral workflow for coding agents.",
+      "status": "in_progress",
+      "progress": 60,
+      "views": [
+        "product",
+        "delivery"
+      ],
+      "groupId": "integrations",
+      "layout": {
+        "x": 1160,
+        "y": 220,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "AGENTS.md"
+        },
+        "acceptance": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Tool-specific adapters still planned"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "schema",
+      "to": "spec",
+      "type": "implements"
+    },
+    {
+      "from": "renderer",
+      "to": "spec",
+      "type": "depends_on"
+    },
+    {
+      "from": "cli",
+      "to": "schema",
+      "type": "depends_on"
+    },
+    {
+      "from": "cli",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "groups",
+      "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "provenance",
+      "to": "cli",
+      "type": "depends_on"
+    },
+    {
+      "from": "agents",
+      "to": "cli",
+      "type": "relates_to"
+    }
+  ]
+}

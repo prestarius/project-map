@@ -690,8 +690,8 @@
       "id": "visual-polish-demo",
       "title": "Visual Polish & Demo Experience",
       "summary": "Premium dark dashboard styling, status summary, breadcrumbs, polished cards and focused dependency visualization.",
-      "status": "needs_review",
-      "progress": 67,
+      "status": "done",
+      "progress": 100,
       "views": [
         "product",
         "architecture",
@@ -715,8 +715,8 @@
         },
         "tests": {
           "required": true,
-          "state": "unknown",
-          "detail": "Awaiting Iteration 10 CI",
+          "state": "pass",
+          "detail": "Iteration 10 tests passed in GitHub Actions",
           "collector": {
             "type": "command",
             "command": [
@@ -739,6 +739,70 @@
             "type": "path_exists",
             "path": "README.md"
           }
+        }
+      },
+      "links": [
+        {
+          "kind": "pull_request",
+          "label": "Iteration 10 PR #10",
+          "url": "https://github.com/prestarius/project-map/pull/10"
+        },
+        {
+          "kind": "commit",
+          "label": "Iteration 10 merge",
+          "url": "https://github.com/prestarius/project-map/commit/c533795de73b2ff69ba80c196529f3fcccbc540c",
+          "ref": "c533795"
+        }
+      ]
+    },
+    {
+      "id": "readme-rework",
+      "title": "README & Onboarding",
+      "summary": "Complete project entry point with local setup, CLI, concepts, agent workflow, CI and adoption guidance.",
+      "status": "needs_review",
+      "progress": 67,
+      "views": [
+        "product",
+        "delivery"
+      ],
+      "groupId": "runtime",
+      "layout": {
+        "x": 3100,
+        "y": 120,
+        "pinned": true
+      },
+      "evidence": {
+        "implementation": {
+          "required": true,
+          "state": "pass",
+          "detail": "README.md rebuilt around onboarding and local execution",
+          "collector": {
+            "type": "path_exists",
+            "path": "README.md"
+          }
+        },
+        "tests": {
+          "required": true,
+          "state": "unknown",
+          "detail": "Awaiting documentation PR CI",
+          "collector": {
+            "type": "command",
+            "command": [
+              "python",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-v"
+            ],
+            "timeoutSeconds": 120
+          }
+        },
+        "acceptance": {
+          "required": true,
+          "state": "pass",
+          "detail": "README includes clone, validate, render, open, update, architecture, evidence and agent workflow"
         }
       }
     }
@@ -847,6 +911,16 @@
     {
       "from": "visual-polish-demo",
       "to": "renderer",
+      "type": "depends_on"
+    },
+    {
+      "from": "readme-rework",
+      "to": "visual-polish-demo",
+      "type": "relates_to"
+    },
+    {
+      "from": "readme-rework",
+      "to": "cli-evidence-engine",
       "type": "depends_on"
     }
   ],
