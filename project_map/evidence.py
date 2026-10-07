@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -45,7 +46,7 @@ def collect_evidence(evidence: dict[str, Any], root: Path) -> dict[str, Any]:
             suffix = output[-1] if output else f"exit {completed.returncode}"
             result["detail"] = f"{' '.join(command)} — {suffix}"[:500]
         elif kind == "github_actions":
-            conclusion = collector.get("conclusion")
+            conclusion = collector.get("conclusion") or os.environ.get("PROJECT_MAP_GITHUB_CONCLUSION")
             result["provenance"] = provenance_from_github()
             if conclusion == "success":
                 result["state"] = PASS
