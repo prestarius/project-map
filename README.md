@@ -1,78 +1,63 @@
 # Project Map
 
-> **A vendor-neutral, evidence-based visual map of a software project — built for humans and coding agents.**
+> **An evidence-based project cockpit and architecture graph for humans and coding agents.**
 
-Project Map turns repository state, architecture, delivery progress, tests, CI, documentation, and acceptance evidence into a single interactive project dashboard.
+Project Map turns the state already present in your repository — code, tests, CI, documentation, acceptance evidence, architecture and delivery progress — into a visual project read model.
 
-It is intentionally simple:
+It does **not** replace your repository, issue tracker or CI system.
 
-- the **repository remains the source of truth**;
-- `project-map.json` is a transparent read model;
-- status is backed by **evidence**, not agent guesswork;
-- the UI is generated as a **single standalone HTML file**;
-- the core runtime has **zero external Python dependencies**;
-- Claude Code, Codex, Kiro, Copilot, CI, and humans can all use the same format.
+The repository stays the source of truth. Project Map makes that truth easier to inspect.
+
+- **Evidence-first** — status should be supported by facts, not agent confidence.
+- **Vendor-neutral** — works with Claude Code, Codex, Kiro, Copilot, humans, or any other workflow.
+- **Repository-first** — the canonical model is a reviewable `project-map.json`.
+- **Portable** — renders to one standalone HTML file.
+- **Dependency-light** — the core runtime currently uses only the Python standard library.
+
+---
+
+## See it in action
+
+### Project Cockpit
+
+The default view answers the practical question:
+
+> **Where is this project right now?**
+
+It summarizes milestones, active work, review debt, blockers, next action and evidence health.
+
+![Project Map Cockpit](docs/images/cockpit.png)
+
+### Architecture & delivery graph
+
+Switch to **Graph** when you need to understand structure, dependencies and the evidence behind a specific node.
+
+The graph supports groups, nested bounded contexts, dependency edges, status highlighting, search, persistent layout and a detailed evidence inspector.
+
+![Project Map Graph](docs/images/graph.png)
 
 ---
 
 ## Why Project Map?
 
-Project boards usually tell you what someone *says* is happening.
+Project boards usually show what someone says is happening.
 
-Project Map aims to show what can actually be supported by the project:
+Project Map is designed to show what the repository can actually support:
 
 - what exists;
 - what is planned;
-- what is currently being implemented;
-- how components depend on one another;
+- what is being implemented;
 - what is blocked;
-- what has been verified;
-- why something is considered done;
-- where the evidence came from.
+- what still needs review;
+- which dependencies exist;
+- what evidence supports completion;
+- where that evidence came from.
 
-The core rule is:
+The core rule is simple:
 
-> **Status must be supported by evidence.**
+> **The agent proposes state. The validator proves state.**
 
-The existence of code alone is never sufficient to mark work as done.
-
----
-
-## What it looks like
-
-Project Map now opens into a dashboard-first **Project Cockpit**, with the full dependency graph available as a dedicated Graph mode.
-
-- milestone rail derived from top-level groups;
-- project-part cards with strong status treatment;
-- next actionable item;
-- needs-attention panel for blocked/review work;
-- evidence health summary;
-- Cockpit / Graph mode switching;
-- status summary chips;
-- Product / Architecture / Delivery views;
-- searchable project graph;
-- draggable nodes;
-- persistent layout;
-- groups and bounded-context swimlanes;
-- nested and collapsible groups;
-- high-level Overview mode;
-- cross-group relationship aggregation;
-- drill-down from overview to implementation detail;
-- curved directional dependency edges;
-- dependency-path highlighting;
-- evidence inspection;
-- commit / PR / CI provenance links;
-- progress and verification status.
-
-Cockpit is a renderer projection over the same canonical `project-map.json`; it does not introduce a second source of truth.
-
-The generated output is still just:
-
-```text
-.project-map/index.html
-```
-
-No web server, framework, Node.js runtime, or database is required.
+Code existing somewhere in the repository is not enough to mark work as done.
 
 ---
 
@@ -84,48 +69,29 @@ Project Map is tested in CI with **Python 3.12**.
 
 There are currently no external Python package dependencies.
 
-Check your Python version:
-
 ```bash
 python --version
 ```
 
-On systems where Python is exposed as `python3`, use `python3` in the commands below.
+If your system exposes Python as `python3`, use that command instead.
 
-## 1. Clone the repository
+## Clone and render
 
 ```bash
 git clone https://github.com/prestarius/project-map.git
 cd project-map
-```
 
-## 2. Validate the map
-
-```bash
 python -m project_map validate
-```
-
-Expected result:
-
-```text
-OK: project-map.json
-```
-
-## 3. Render the UI
-
-```bash
 python -m project_map render
 ```
 
-This generates:
+The generated UI is written to:
 
 ```text
 .project-map/index.html
 ```
 
-## 4. Open it
-
-You can open the generated HTML directly in a browser.
+Open it:
 
 ### macOS
 
@@ -145,13 +111,11 @@ xdg-open .project-map/index.html
 start .project-map/index.html
 ```
 
-That is enough to run Project Map locally.
-
 ---
 
-# Try the curated self-demo
+## Run the curated self-demo
 
-The repository includes a curated sample based on **Project Map itself**. It is intentionally smaller than the full dogfood map, with a layout that is easy to understand immediately.
+The repository includes a smaller demo based on **Project Map itself**.
 
 ```bash
 python -m project_map \
@@ -160,132 +124,99 @@ python -m project_map \
   -o .project-map/self-demo.html
 ```
 
-Open it:
+Then open:
 
-### macOS
-
-```bash
-open .project-map/self-demo.html
+```text
+.project-map/self-demo.html
 ```
 
-### Linux
-
-```bash
-xdg-open .project-map/self-demo.html
-```
-
-### Windows
-
-```powershell
-start .project-map/self-demo.html
-```
-
-There is also a smaller generic example in `examples/project-map.json`.
+This is the fastest way to explore the Cockpit and Graph modes without modifying the dogfood map.
 
 ---
 
-# CLI
+# Two complementary views
 
-Project Map exposes four core commands.
+## Cockpit
 
-## Validate
+Cockpit is the default landing view.
 
-Validate the Project Map contract:
+It derives a project-level summary from the same canonical nodes, groups and evidence used by the graph.
 
-```bash
-python -m project_map validate
-```
+It includes:
 
-Use another map:
+- top-level milestone rail;
+- completion, active, review and blocked counts;
+- project-part cards;
+- progress and status treatment;
+- next actionable item;
+- needs-attention panel;
+- required evidence health;
+- Product / Architecture / Delivery filtering.
 
-```bash
-python -m project_map --map path/to/project-map.json validate
-```
+Cockpit does **not** maintain separate project state.
 
----
+It is a projection over `project-map.json`.
 
-## Render
+## Graph
 
-Generate the interactive standalone HTML:
+Graph is the structural and diagnostic view.
 
-```bash
-python -m project_map render
-```
+It includes:
 
-Custom output:
+- dependency graph;
+- draggable nodes;
+- pan and zoom;
+- curved directional edges;
+- connection highlighting;
+- Product / Architecture / Delivery filters;
+- search;
+- groups and swimlanes;
+- nested groups;
+- collapse / expand;
+- persistent layout;
+- high-level Overview mode;
+- cross-group relationship aggregation;
+- overview drill-down;
+- node inspector;
+- evidence and provenance links.
 
-```bash
-python -m project_map render -o build/project-map.html
-```
+Use Cockpit to understand the project quickly.
 
----
-
-## Collect
-
-Run explicitly configured evidence collectors and update the map:
-
-```bash
-python -m project_map collect
-```
-
-Check whether committed evidence is stale without writing changes:
-
-```bash
-python -m project_map collect --check
-```
-
-Exit code `2` means the collected evidence differs from the committed map.
-
-> Evidence collection is intentionally explicit. A `command` collector may execute project-defined tests or commands, so agents should not run collectors silently.
-
----
-
-## Update
-
-Collect evidence and render in one step:
-
-```bash
-python -m project_map update
-```
-
-Custom repository root and map:
-
-```bash
-python -m project_map \
-  --map docs/project-map.json \
-  --root . \
-  update
-```
+Use Graph to investigate **why** the project is in that state.
 
 ---
 
 # Status model
 
-Project Map uses five intentionally small states:
+Project Map intentionally keeps the lifecycle small.
 
 | Status | Meaning |
 |---|---|
 | ⚪ `planned` | Work has not started |
 | 🟡 `in_progress` | Implementation is underway |
-| 🔵 `needs_review` | Implementation exists, but verification is incomplete or failed |
+| 🔵 `needs_review` | Implementation exists, but required verification is incomplete or failed |
 | 🔴 `blocked` | Progress is prevented by an explicit dependency or problem |
 | 🟢 `done` | All required evidence passes |
 
-A typical node should move toward `done` through evidence, not intuition.
+A node should move toward `done` through evidence rather than interpretation.
 
 ---
 
-# Evidence model
+# Evidence
 
-A node may define evidence such as:
+A node can declare the facts required to support its state.
 
 ```json
 {
+  "id": "payments-api",
+  "title": "Payments API",
+  "status": "needs_review",
+  "progress": 80,
   "evidence": {
     "implementation": {
       "required": true,
       "state": "pass",
-      "detail": "src/payment/service.py"
+      "detail": "src/payments/api.py"
     },
     "tests": {
       "required": true,
@@ -294,36 +225,34 @@ A node may define evidence such as:
     },
     "ci": {
       "required": true,
-      "state": "pass",
-      "detail": "GitHub Actions"
+      "state": "unknown",
+      "detail": "Awaiting CI"
     }
   }
 }
 ```
 
-Allowed evidence states:
+Evidence states:
 
 - `pass`
 - `fail`
 - `unknown`
 - `not_applicable`
 
-If required verification is unknown, the feature should not silently become `done`.
+If required evidence is unknown, Project Map should not silently promote the node to `done`.
 
 ---
 
-# Evidence collectors
+# Deterministic evidence collectors
 
-Evidence may be maintained manually or collected deterministically.
-
-Current collectors:
+Project Map can maintain evidence manually or collect selected facts automatically.
 
 | Collector | Purpose |
 |---|---|
 | `path_exists` | Verify that a declared path exists |
-| `command` | Run a command and use its exit code as evidence |
-| `git_clean` | Verify that the Git working tree is clean |
-| `github_actions` | Attach GitHub commit / run provenance |
+| `command` | Execute a command and use its exit code as evidence |
+| `git_clean` | Verify that the working tree is clean |
+| `github_actions` | Attach GitHub commit / CI provenance |
 
 Example:
 
@@ -349,15 +278,197 @@ Example:
 }
 ```
 
-Collectors gather facts. They do not infer semantic completion from source code.
+Collectors gather objective facts.
+
+They do not inspect source code and guess semantic completion.
+
+---
+
+# CLI
+
+Project Map exposes four core commands.
+
+| Command | Purpose |
+|---|---|
+| `validate` | Validate the canonical Project Map |
+| `render` | Generate the standalone HTML UI |
+| `collect` | Run configured evidence collectors |
+| `update` | Collect evidence and render in one step |
+
+## Validate
+
+```bash
+python -m project_map validate
+```
+
+Use another map:
+
+```bash
+python -m project_map --map path/to/project-map.json validate
+```
+
+## Render
+
+```bash
+python -m project_map render
+```
+
+Custom output:
+
+```bash
+python -m project_map render -o build/project-map.html
+```
+
+## Collect
+
+```bash
+python -m project_map collect
+```
+
+Check whether committed evidence is stale without intentionally keeping the generated changes:
+
+```bash
+python -m project_map collect --check
+```
+
+Exit code `2` means collected evidence differs from the committed map.
+
+> A `command` collector may execute project-defined commands. Coding agents should not run evidence collectors silently.
+
+## Update
+
+```bash
+python -m project_map update
+```
+
+Custom map and repository root:
+
+```bash
+python -m project_map \
+  --map docs/project-map.json \
+  --root . \
+  update
+```
+
+---
+
+# Views
+
+The same canonical graph can be explored from multiple perspectives.
+
+### Product
+
+**What are we building?**
+
+Capabilities, user-facing scope and milestones.
+
+### Architecture
+
+**How is it built?**
+
+Services, components, contracts, boundaries and dependencies.
+
+### Delivery
+
+**Where are we now?**
+
+Implementation state, verification, blockers and evidence.
+
+A node may belong to one or more views.
+
+---
+
+# Groups and bounded contexts
+
+Large maps do not have to remain flat.
+
+```json
+{
+  "groups": [
+    {
+      "id": "checkout",
+      "name": "Checkout"
+    },
+    {
+      "id": "platform",
+      "name": "Platform"
+    }
+  ]
+}
+```
+
+Assign a node to a group:
+
+```json
+{
+  "id": "payments-api",
+  "title": "Payments API",
+  "groupId": "checkout"
+}
+```
+
+Groups may be nested:
+
+```json
+{
+  "id": "runtime",
+  "name": "Runtime & Tooling",
+  "parentGroupId": "core"
+}
+```
+
+The renderer can visualize these as bounded contexts / swimlanes and supports filtering and collapse.
+
+---
+
+# Overview mode
+
+Graph mode includes a high-level **Overview** projection.
+
+At that level:
+
+- root groups become summary cards;
+- status is aggregated from descendant nodes;
+- node counts are shown;
+- node-level dependencies crossing group boundaries are aggregated;
+- aggregated relationships can be inspected;
+- selecting a group drills back into canonical detail.
+
+Overview remains derived from the same nodes, groups and edges.
+
+There is no separate architecture model.
+
+---
+
+# Persistent layout
+
+Nodes may store stable graph coordinates.
+
+```json
+{
+  "layout": {
+    "x": 420,
+    "y": 180,
+    "pinned": true
+  }
+}
+```
+
+Without explicit coordinates, the renderer creates a deterministic dependency-oriented fallback layout.
+
+To curate a layout:
+
+1. drag nodes in Graph mode;
+2. click **Save layout**;
+3. save the generated `project-map.layout.json`;
+4. copy the resulting `layout` values into `project-map.json`;
+5. commit them to Git.
 
 ---
 
 # GitHub provenance
 
-Project Map can attach clickable provenance to evidence.
-
-For example:
+Evidence may include clickable provenance.
 
 ```json
 {
@@ -383,9 +494,108 @@ For example:
 }
 ```
 
-The GitHub Actions collector captures context from standard `GITHUB_*` variables.
+The GitHub adapter reads standard `GITHUB_*` context.
 
-It does **not** claim that CI passed merely because it is running inside GitHub Actions. A successful conclusion must be explicit.
+It does **not** claim that CI passed merely because it is executing inside GitHub Actions. The conclusion must be supplied explicitly.
+
+---
+
+# Agentic development workflow
+
+Project Map is designed to live inside an agentic SDLC loop.
+
+```text
+brainstorm / plan
+      ↓
+Project Map
+      ↓
+implementation
+      ↓
+tests / CI / acceptance
+      ↓
+evidence collection
+      ↓
+status derivation
+      ↓
+Project Map
+      ↓
+review / merge
+```
+
+A practical workflow is:
+
+**Before implementation**
+
+1. inspect the current map;
+2. identify affected nodes;
+3. update planned or in-progress scope when needed.
+
+**After implementation**
+
+1. inspect changed files;
+2. run or inspect tests;
+3. inspect CI;
+4. verify acceptance criteria;
+5. update evidence;
+6. derive status;
+7. regenerate the UI;
+8. review and merge.
+
+---
+
+# Coding agents
+
+Project Map is intentionally independent of one coding-agent vendor.
+
+The same repository contract can be consumed by:
+
+- Claude Code;
+- OpenAI Codex;
+- AWS Kiro;
+- GitHub Copilot;
+- other coding agents;
+- humans.
+
+Agents should start with:
+
+- [AGENTS.md](AGENTS.md)
+- [project-map.json](project-map.json)
+- [Project Map v1 specification](docs/spec-v1.md)
+
+Tool-specific skills and adapters can be added later without changing the canonical model.
+
+---
+
+# Use Project Map in another repository
+
+The current adoption path is intentionally explicit while packaging is still evolving.
+
+1. add the `project_map/` runtime and `scripts/render.py`;
+2. create `project-map.json`;
+3. optionally add `project-map.schema.json` to your editor / validation workflow;
+4. add `AGENTS.md` guidance for coding agents;
+5. define deterministic evidence where useful;
+6. validate and render locally or in CI.
+
+A minimal canonical map looks like this:
+
+```json
+{
+  "version": "1.0",
+  "project": {
+    "id": "my-project",
+    "name": "My Project"
+  },
+  "views": [],
+  "nodes": [],
+  "edges": []
+}
+```
+
+For the complete contract, see:
+
+- [docs/spec-v1.md](docs/spec-v1.md)
+- [project-map.schema.json](project-map.schema.json)
 
 ---
 
@@ -410,6 +620,9 @@ It does **not** claim that CI passed merely because it is running inside GitHub 
 │   └── render.py
 │
 ├── docs/
+│   ├── images/
+│   │   ├── cockpit.png
+│   │   └── graph.png
 │   └── spec-v1.md
 │
 ├── examples/
@@ -431,261 +644,27 @@ It does **not** claim that CI passed merely because it is running inside GitHub 
 
 ---
 
-# Canonical Project Map
-
-The canonical project map is a human-readable JSON document.
-
-Minimal shape:
-
-```json
-{
-  "version": "1.0",
-  "project": {
-    "id": "my-project",
-    "name": "My Project"
-  },
-  "views": [],
-  "nodes": [],
-  "edges": []
-}
-```
-
-For the full contract see:
-
-- [Project Map v1 specification](docs/spec-v1.md)
-- [JSON Schema](project-map.schema.json)
-
----
-
-# Views
-
-The same canonical graph can be projected through different perspectives.
-
-The default views are:
-
-### Product
-
-**What are we building?**
-
-Useful for product capabilities, features, milestones, and user-facing scope.
-
-### Architecture
-
-**How is it built?**
-
-Useful for services, components, contracts, boundaries, and dependencies.
-
-### Delivery
-
-**Where are we now?**
-
-Useful for implementation state, verification, blockers, and CI evidence.
-
-A node may belong to one or more views.
-
----
-
-# Groups and bounded contexts
-
-Large maps do not have to remain flat.
-
-Define optional groups:
-
-```json
-{
-  "groups": [
-    {
-      "id": "checkout",
-      "name": "Checkout"
-    },
-    {
-      "id": "platform",
-      "name": "Platform"
-    }
-  ]
-}
-```
-
-Assign a node:
-
-```json
-{
-  "id": "payments-api",
-  "title": "Payments API",
-  "groupId": "checkout"
-}
-```
-
-Groups can also be nested:
-
-```json
-{
-  "id": "runtime",
-  "name": "Runtime & Tooling",
-  "parentGroupId": "core"
-}
-```
-
-The UI supports:
-
-- swimlanes;
-- nested boundaries;
-- collapse / expand;
-- group filtering;
-- aggregated group status.
-
----
-
-# Overview mode
-
-For larger systems, switch to **Overview**.
-
-Overview derives a high-level architecture from the canonical graph:
-
-- top-level groups become summary cards;
-- status is aggregated from descendant nodes;
-- node counts are displayed;
-- relationships crossing top-level groups are aggregated;
-- aggregated edges show the number of underlying relationships.
-
-Click a group to drill back into detail.
-
-Click an aggregated relationship to inspect the concrete canonical edges behind it.
-
-Overview is only a renderer projection. It does not introduce a second source of truth.
-
----
-
-# Layout
-
-Nodes may have persistent coordinates:
-
-```json
-{
-  "layout": {
-    "x": 420,
-    "y": 180,
-    "pinned": true
-  }
-}
-```
-
-Without explicit coordinates, Project Map generates a deterministic dependency-oriented fallback layout.
-
-You can also:
-
-1. drag nodes in the UI;
-2. click **Save layout**;
-3. download `project-map.layout.json`;
-4. copy the resulting `layout` fields into the canonical `project-map.json`;
-5. commit the layout to Git.
-
----
-
-# Agentic development workflow
-
-Project Map is designed to sit inside an agentic SDLC loop.
-
-Before implementation:
-
-1. inspect the current map;
-2. identify affected nodes;
-3. update planned / in-progress scope where appropriate.
-
-After implementation:
-
-1. inspect changed files;
-2. run or inspect tests;
-3. inspect CI;
-4. verify acceptance criteria;
-5. update evidence;
-6. derive status from evidence;
-7. regenerate the UI;
-8. review and merge.
-
-Conceptually:
-
-```text
-brainstorm
-   ↓
-Project Map
-   ↓
-implementation
-   ↓
-tests / CI / acceptance
-   ↓
-evidence update
-   ↓
-Project Map
-   ↓
-review / merge
-```
-
-The intended principle is:
-
-> **The agent proposes state. The validator proves state.**
-
----
-
-# Coding agents
-
-Project Map is deliberately tool-agnostic.
-
-The same repository contract can be consumed by:
-
-- Claude Code;
-- OpenAI Codex;
-- AWS Kiro;
-- GitHub Copilot;
-- other coding agents;
-- humans.
-
-Agents should start with:
-
-- [AGENTS.md](AGENTS.md)
-- [project-map.json](project-map.json)
-- [docs/spec-v1.md](docs/spec-v1.md)
-
-Tool-specific skills and adapters may be layered on top later without changing the canonical model.
-
----
-
 # CI
 
 The repository dogfoods Project Map in GitHub Actions.
 
-Current CI:
+The workflow currently:
 
-1. validates `project-map.json`;
+1. validates the dogfood map;
 2. runs the Python test suite;
-3. renders the generic example map;
-4. renders the curated Project Map self-demo;
-5. renders the repository's own dogfood map;
-6. syntax-checks the generated JavaScript when Node.js is available;
+3. syntax-checks generated JavaScript through the renderer tests;
+4. renders the generic example;
+5. renders the curated self-demo;
+6. renders the repository's own map;
 7. smoke-tests GitHub provenance collection.
 
-Run the same core checks locally:
+Run the core checks locally:
 
 ```bash
 python -m project_map validate
 python -m unittest discover -s tests -v
 python -m project_map render
 ```
-
----
-
-# Using Project Map in another repository
-
-A minimal adoption path is:
-
-1. copy `project_map/` and `scripts/render.py`, or package the tool once distribution is available;
-2. create a `project-map.json`;
-3. optionally reference `project-map.schema.json`;
-4. add `AGENTS.md` guidance;
-5. add deterministic evidence collectors;
-6. render locally or in CI.
-
-For now, Project Map is still under active development and is dogfooded directly from this repository.
 
 ---
 
@@ -694,51 +673,39 @@ For now, Project Map is still under active development and is dogfooded directly
 Project Map should remain:
 
 - **evidence-based** — facts before inference;
-- **vendor-neutral** — no dependency on one coding agent;
+- **vendor-neutral** — no dependency on one agent ecosystem;
 - **repository-first** — no parallel planning database;
-- **human-readable** — JSON that can be reviewed in a PR;
+- **human-readable** — project state is reviewable in Git;
 - **deterministic where possible** — collectors over guesses;
-- **progressively adoptable** — small projects can stay small;
+- **progressively adoptable** — small projects can remain small;
 - **portable** — standalone HTML output;
-- **low-dependency** — the core currently uses only Python's standard library.
-
----
-
-# Current state
-
-This repository uses Project Map to track Project Map itself.
-
-See:
-
-- [project-map.json](project-map.json)
-- [Project Map v1 specification](docs/spec-v1.md)
-- [Agent instructions](AGENTS.md)
+- **low-dependency** — no framework required to view the result.
 
 ---
 
 # Roadmap
 
-Near-term ideas:
+Near-term areas worth exploring:
 
-- GitLab CI provenance adapter;
+- easier packaging and installation;
 - richer deterministic evidence collectors;
+- GitLab CI provenance;
 - PR and issue discovery;
-- tool-specific agent skills / adapters;
+- tool-specific coding-agent adapters;
 - keyboard navigation;
-- URL state and shareable deep links;
-- minimap / orientation aid;
-- packaging and easier installation;
+- shareable URL state / deep links;
+- minimap / graph orientation aid;
 - release automation.
 
-The roadmap should remain driven by the same rule as the product itself: add capabilities only when they improve the project read model without creating another source of truth.
+The roadmap follows the same principle as the product:
+
+> Add capabilities only when they improve the project read model without creating another source of truth.
 
 ---
 
 # Contributing
 
-Project Map is currently evolving quickly.
-
-Before contributing:
+Before opening a change:
 
 ```bash
 python -m project_map validate
@@ -746,15 +713,13 @@ python -m unittest discover -s tests -v
 python -m project_map render
 ```
 
-Keep changes:
+Changes should remain:
 
 - evidence-based;
 - vendor-neutral;
 - dependency-light;
 - backwards-compatible where practical;
-- documented in the README / specification when behavior changes.
-
-More detailed contributor guidance will be added before the first tagged release.
+- documented when behavior changes.
 
 ---
 
